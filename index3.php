@@ -24,49 +24,48 @@ $(document).ready(function ()
 var default_active_color = "00FF00";
 var default_inactive_color = "FF0000";
 var default_color = "FFFFFF";
+var new_color ="dddddd";
 var image = $('#innermap');
 image.mapster({
         
 
 	mapKey: 'data-key',
 	fillOpacity: 1,
-        fillColor: default_color,  //normally never used
-        //fillColor: default_inactive_color,  //normally never used
-	
-	render_select: {
-		fillColor: default_active_color                                                        
-        },
+        //fillColor: default_color,  //normally never used
+        fillColor: default_inactive_color,  //normally never used
 
         onClick: function (e) {
 
-		var data = '{"name":"India", "alpha2_code":"IN","alpha3_code":"IND"}';
-		$.ajax({ 
-			type: "GET",
-			dataType: "json",
-			url: "http://services.groupkt.com/country/get/all",
-			success: function(data){        
-				alert(JSON.stringify(data));
-			 }
 
-		});
-
-	/*
             if (e.key == 'NH') {
-        	//logic for status change
+        	//logic for color change
 		var opts = image.mapster('get_options', null, true);	
-                var isSelected = opts.render_select.selected;
-		if (isSelected){
-			alert ("Si estaba seleccionado, des-seleccionandolo..!");
-		} else {
-			alert ("No estaba seleccionado, seleccionandolo..!");
-			}
+                var current_color = opts.render_select.fillColor;
+		if (current_color == default_active_color){
+			new_color = default_inactive_color;
+		} else if (current_color == default_inactive_color){
+				new_color = default_active_color;
+				}else{
+					alert ("ERROR Color status undefinied!!");
+					}
 
 
             }
-	*/
+
+            image.mapster('set_options', {
+                areas: [{
+                    key: "NH",
+                    fillColor: new_color                                                        
+                    }]
+                });
 
         },
-
+        areas: [
+            {
+                key: "NH",
+                fillColor: default_color
+            }
+            ]
 });
 });
 
