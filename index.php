@@ -18,8 +18,62 @@ require_once(__ROOT__.'/basic.php');
 <!--<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/map.js"></script>-->
 <script type="text/javascript">
 
+
+
 $(document).ready(function ()
 {
+
+
+function Notused_toggleDevice(device){
+	var info = '{"device":"'+ device + '"}';
+	$.ajax({ 
+		type: "GET",
+		dataType: "json",
+		data: { method: "hello", format: "json" },
+		url: "service.php",
+		success: function(info){        
+		 }
+
+	}).done(function() {
+		info = JSON.stringify(info);
+		return info;	
+	});
+
+}
+
+function sendMessage (data){
+	var xhttp;
+
+	if (window.XMLHttpRequest) {
+		xhttp = new XMLHttpRequest();
+	} else {
+		// code for IE6, IE5
+		xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	data = encodeURI(data + '&format=json');
+	xhttp.open("GET", data , false); //false to make it asynch
+	xhttp.send();
+	return xhttp.responseText;
+
+}
+
+function toggleDevice(device){
+	var info = '{"device":"'+ device + '"}';
+	var method = 'toggle';
+	var data = "service.php?method=" + method + "&info=" + info;   
+	return sendMessage(data);
+}
+
+function allStop(){
+	var method = 'allstop';
+	var data = 'service.php?method=' + method;   
+	alert(sendMessage(data));
+}
+
+//Capture the EMERGENCY STOP
+$('#Lallstop').click(function(){ allStop(); return false; });
+
 // default colors
 var default_active_color = "00FF00";
 var default_inactive_color = "FF0000";
@@ -38,19 +92,9 @@ image.mapster({
         },
 
         onClick: function (e) {
-
-		var data = '{"name":"India", "alpha2_code":"IN","alpha3_code":"IND"}';
-		$.ajax({ 
-			type: "GET",
-			dataType: "json",
-			url: "http://services.groupkt.com/country/get/all",
-			success: function(data){        
-				alert(JSON.stringify(data));
-			 }
-
-		});
-
-	/*
+		var resp = toggleDevice(e.key);
+		alert (resp);
+	/* En caso que vuelva al modo que cambia el color 
             if (e.key == 'NH') {
         	//logic for status change
 		var opts = image.mapster('get_options', null, true);	
@@ -112,7 +156,7 @@ image.mapster({
                     <li><a href="#outer">Outer Circuit</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="">Emergency Stop!</a></li>
+                    <li><a id="Lallstop" href="#">Emergency Stop!</a></li>
                 </ul>
  
              </div>
@@ -127,8 +171,8 @@ image.mapster({
 				<div class="panel-body">
 					<img src="map/train1.png" usemap="#train1" border="0" id="innermap">
 					<map name="train1" id="train1_map">
-						<area shape="circle" coords="100,100,10" href="#" data-key="NH">
-						<area shape="circle" coords="200,100,10" href="#" data-key="NY">
+						<area shape="circle" coords="100,100,10" href="#" data-key="REL01">
+						<area shape="circle" coords="200,100,10" href="#" data-key="REL02">
 					</map>
 
 				</div>
@@ -138,9 +182,6 @@ image.mapster({
 				<div class="panel-body">
 					<img src="map/train2.png" usemap="#train2" border="0" id="outermap">
 					<map name="train2">
-					<area shape="polygon" coords="19,44,45,11,87,37,82,76,49,98" href="http://www.trees.com/save.html">
-					<area shape="rect" coords="128,132,241,179" href="http://www.trees.com/furniture.html">
-					<area shape="circle" coords="68,211,35" href="http://www.trees.com/plantations.html">
 					</map>
 
 				</div>
