@@ -154,14 +154,25 @@ if( strcasecmp($_GET['method'],'toggle') == 0){
 	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
 	$info = json_decode(urldecode($_GET['info']));
 	$device = $info->device;
-	$response['data'] = 'Toggle: '.$device;
+	$result = shell_exec("python relay.py ".$_GET['method']." ".$device);
+	$response['data'] = 'Toggle: '.$result;
 }
 
 // Method Emergency stop
 if( strcasecmp($_GET['method'],'allstop') == 0){
 	$response['code'] = 1;
 	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$response['data'] = 'Emergency stop!';
+	$result = shell_exec("python relay.py ".$_GET['method']." dummy");
+	$response['data'] = $result;
+}
+
+
+// Method to enable all
+if( strcasecmp($_GET['method'],'allstart') == 0){
+	$response['code'] = 1;
+	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+	$result = shell_exec("python relay.py ".$_GET['method']." dummy");
+	$response['data'] = $result;
 }
 
 // --- Step 4: Deliver Response

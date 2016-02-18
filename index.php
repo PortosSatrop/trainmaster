@@ -23,7 +23,7 @@ require_once(__ROOT__.'/basic.php');
 $(document).ready(function ()
 {
 
-
+/* USING AJAX
 function Notused_toggleDevice(device){
 	var info = '{"device":"'+ device + '"}';
 	$.ajax({ 
@@ -40,6 +40,7 @@ function Notused_toggleDevice(device){
 	});
 
 }
+*/
 
 function sendMessage (data){
 	var xhttp;
@@ -71,8 +72,16 @@ function allStop(){
 	alert(sendMessage(data));
 }
 
-//Capture the EMERGENCY STOP
+function allStart(){
+	var method = 'allstart';
+	var data = 'service.php?method=' + method;   
+	alert(sendMessage(data));
+}
+
+
+//Capture the EMERGENCY STOP and the ALL START
 $('#Lallstop').click(function(){ allStop(); return false; });
+$('#Lallstart').click(function(){ allStart(); return false; });
 
 // default colors
 var default_active_color = "00FF00";
@@ -156,6 +165,7 @@ image.mapster({
                     <li><a href="#outer">Outer Circuit</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li><a id="Lallstart" href="#">All Start!</a></li>
                     <li><a id="Lallstop" href="#">Emergency Stop!</a></li>
                 </ul>
  
@@ -171,8 +181,8 @@ image.mapster({
 				<div class="panel-body">
 					<img src="map/train1.png" usemap="#train1" border="0" id="innermap">
 					<map name="train1" id="train1_map">
-						<area shape="circle" coords="100,100,10" href="#" data-key="REL01">
-						<area shape="circle" coords="200,100,10" href="#" data-key="REL02">
+						<area shape="circle" coords="228,44,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="REL01">
+						<area shape="circle" coords="228,108,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="REL02">
 					</map>
 
 				</div>
