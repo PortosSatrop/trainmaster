@@ -5,7 +5,7 @@
 	Input:
 
 		$_GET['format'] = [ json | html | xml ]
-		$_GET['method'] = []
+		$_GET['method'] = [ toggle | allstop | allstart]
 
 	Output: A formatted HTTP response
 
@@ -154,15 +154,17 @@ if( strcasecmp($_GET['method'],'toggle') == 0){
 	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
 	$info = json_decode(urldecode($_GET['info']));
 	$device = $info->device;
-	$result = shell_exec("python relay.py ".$_GET['method']." ".$device);
-	$response['data'] = 'Toggle: '.$result;
+	$cat = $info->category;
+	$result = shell_exec("python relay.py ".$_GET['method']." ".$cat." ".$device);
+	//$result = "python relay.py ".$_GET['method']." ".$cat." ".$device;
+	$response['data'] = $result;
 }
 
 // Method Emergency stop
 if( strcasecmp($_GET['method'],'allstop') == 0){
 	$response['code'] = 1;
 	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$result = shell_exec("python relay.py ".$_GET['method']." dummy");
+	$result = shell_exec("python relay.py ".$_GET['method']." dummy dummy");
 	$response['data'] = $result;
 }
 
@@ -171,7 +173,7 @@ if( strcasecmp($_GET['method'],'allstop') == 0){
 if( strcasecmp($_GET['method'],'allstart') == 0){
 	$response['code'] = 1;
 	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$result = shell_exec("python relay.py ".$_GET['method']." dummy");
+	$result = shell_exec("python relay.py ".$_GET['method']." dummy dummy");
 	$response['data'] = $result;
 }
 

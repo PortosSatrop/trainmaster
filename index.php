@@ -2,7 +2,6 @@
 
 define('__ROOT__', dirname(__FILE__)); 
 require_once(__ROOT__.'/basic.php'); 
-
 ?> 
 <html>
 <head>
@@ -59,8 +58,8 @@ function sendMessage (data){
 
 }
 
-function toggleDevice(device){
-	var info = '{"device":"'+ device + '"}';
+function toggleDevice(cat, device){
+	var info = '{"device":"'+ device + '","category":"'+ cat + '"}';
 	var method = 'toggle';
 	var data = "service.php?method=" + method + "&info=" + info;   
 	return sendMessage(data);
@@ -78,10 +77,20 @@ function allStart(){
 	alert(sendMessage(data));
 }
 
+function innerSize(size){
+//alert ("NO FUNCIONA");
+	var w = $('#innermap').width();
+	w = w*size;
+	$('#innermap').mapster('resize',w);
+}
 
 //Capture the EMERGENCY STOP and the ALL START
 $('#Lallstop').click(function(){ allStop(); return false; });
 $('#Lallstart').click(function(){ allStart(); return false; });
+
+//Change maps size dynamically
+$('#innerDecrease').click(function(){ innerSize(0.9); return false; });
+$('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 
 // default colors
 var default_active_color = "00FF00";
@@ -101,8 +110,17 @@ image.mapster({
         },
 
         onClick: function (e) {
-		var resp = toggleDevice(e.key);
-		alert (resp);
+		var rel = e.key;
+		var v = rel.split("-");
+		var cat;
+		if (v[0] == "P"){
+			cat="power";
+		}
+		if (v[0] == "S"){
+			cat="switch";
+		}
+		var resp = toggleDevice(cat,v[1]);
+		//alert (resp);
 	/* En caso que vuelva al modo que cambia el color 
             if (e.key == 'NH') {
         	//logic for status change
@@ -179,10 +197,12 @@ image.mapster({
 			<div class="panel panel-default"><a name="inner"></a>
 				<div class="panel-heading">Inner Circuit</div>
 				<div class="panel-body">
-					<img src="map/train1.png" usemap="#train1" border="0" id="innermap">
+					<a id="innerIncrease" href="#">Increase</a>
+					<a id="innerDecrease" href="#">Decrease</a>
+					<img width="<?php print_r($configv["mapwidth"])?>%" src="map/train1.png" usemap="#train1" border="0" id="innermap">
 					<map name="train1" id="train1_map">
-						<area shape="circle" coords="228,44,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="REL01">
-						<area shape="circle" coords="228,108,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="REL02">
+						<area shape="circle" coords="228,44,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="P-REL01">
+						<area shape="circle" coords="228,108,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="P-REL02">
 					</map>
 
 				</div>
@@ -190,7 +210,7 @@ image.mapster({
 			<div class="panel panel-default"><a name="outer"></a>
 				<div class="panel-heading">Outer Circuit</div>
 				<div class="panel-body">
-					<img src="map/train2.png" usemap="#train2" border="0" id="outermap">
+					<img width="<?php print_r($configv["mapwidth"])?>%" src="map/train2.png" usemap="#train2" border="0" id="outermap">
 					<map name="train2">
 					</map>
 

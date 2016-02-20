@@ -46,11 +46,23 @@ def shiftRegisters(number):
 #### comment until here
 
 # Helpful methods
-def allStop():
+def allStop(relays):
 	digitalWrite(ALL, LOW)
+	options = relays.options("power")
+	for option in options:
+		relays.set("power", option, LOW)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
 
-def allStart():
+
+def allStart(relays):
 	digitalWrite(ALL, HIGH)
+	options = relays.options("power")
+	for option in options:
+		relays.set("power", option, HIGH)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
+
 
 
 def relayHigh(relays, category, relay):
@@ -95,9 +107,9 @@ if method=="toggle":
 		relayLow(relays, category, relay)
 
 if method=="allstop":
-	allStop()
+	allStop(relays)
 
 if method=="allstart":
-	allStart()
+	allStart(relays)
 
 
