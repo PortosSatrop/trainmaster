@@ -224,7 +224,8 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 					foreach($vRelays['power'] as $r=>$info) {
 						$jinfo = json_decode($info);
 						$coord = $jinfo->{"coord"};
-						$text = '<area shape="circle" coords="'.$coord.','.$configv["electric_light_width"].'" href="#" data-key="'.$r.',all,circB">';
+						$circuit = "circ".$jinfo->{"circuit"};
+						$text = '<area shape="circle" coords="'.$coord.','.$configv["electric_light_width"].'" href="#" data-key="'.$r.',all,'.$circuit.'">';
 						print_r($text);
 
 					}					
