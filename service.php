@@ -1,11 +1,13 @@
-   <?php
+<?php
 /*
 	This script provides a RESTful API interface for a web application
 
 	Input:
 
 		$_GET['format'] = [ json | html | xml ]
-		$_GET['method'] = [ toggle | allstop | allstart]
+		$_GET['info'] = JSON
+		JSON method = [ toggle | allstop | allstart]
+		JSON device = P-REL01 for example
 
 	Output: A formatted HTTP response
 
@@ -140,43 +142,49 @@ if( $authentication_required ){
 }
 
 // --- Step 3: Process Request
-
-// Method Say Hello to the API
-if( strcasecmp($_GET['method'],'hello') == 0){
-	$response['code'] = 1;
-	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$response['data'] = 'Hello World';
-}
-
-// Method Toggle device
-if( strcasecmp($_GET['method'],'toggle') == 0){
-	$response['code'] = 1;
-	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$info = json_decode(urldecode($_GET['info']));
+// Mandatory to have a method field in the JSON
+$info = json_decode(urldecode($_GET['info']));
+if(!property_exists($info, 'method') && !is_array($info->method)){
+	$response['data']= "Missing method";
+	$response['code'] = 5;
+}else{
+	$method = $info->method;
 	$device = $info->device;
-	$cat = $info->category;
-	$result = shell_exec("python relay.py ".$_GET['method']." ".$cat." ".$device);
-	//$result = "python relay.py ".$_GET['method']." ".$cat." ".$device;
-	$response['data'] = $result;
+
+
+	// Method Say Hello to the API
+	if( strcasecmp($method,'hello') == 0){
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$response['data'] = 'Hello World';
+	}
+
+	// Method Toggle device
+	if( strcasecmp($method,'toggle') == 0){
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." ".$device);
+		$response['data'] = $result;
+	}
+	
+	// Method Emergency stop
+	if( strcasecmp($method,'allstop') == 0){
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." dummy");
+		$response['data'] = $result;
+	}
+	
+	
+	// Method to enable all
+	if( strcasecmp($method,'allstart') == 0){
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." dummy");
+		$response['data'] = $result;
+	}
+	
 }
-
-// Method Emergency stop
-if( strcasecmp($_GET['method'],'allstop') == 0){
-	$response['code'] = 1;
-	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$result = shell_exec("python relay.py ".$_GET['method']." dummy dummy");
-	$response['data'] = $result;
-}
-
-
-// Method to enable all
-if( strcasecmp($_GET['method'],'allstart') == 0){
-	$response['code'] = 1;
-	$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-	$result = shell_exec("python relay.py ".$_GET['method']." dummy dummy");
-	$response['data'] = $result;
-}
-
 // --- Step 4: Deliver Response
 
 // Return Response to browser

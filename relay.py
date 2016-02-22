@@ -2,8 +2,7 @@
 # Name:			relay
 # Purpose		This program interfaces from TrainMaster UI service.php to the Raspberry Pi
 # Arguments list:	method = toggle | allstop | allstart
-# 			category = power | switch
-#			relay = relay code
+#			relay = relay code. Example P-REL01
 #
 # Author:		Manuel
 # Shift register pinout :
@@ -25,6 +24,7 @@ GPIO.output(18, False)
 import relaylib
 import sys
 import ConfigParser
+import json
 #from shiftpi import HIGH, LOW, digitalWrite, delay
 
 relaylib.log("INFO","Starting...")
@@ -46,11 +46,32 @@ def shiftRegisters(number):
 #### comment until here
 
 # Helpful methods
+
+## returns Json
+def getRelayData(relays,cat,relay):
+	data_str =  relays.get(cat, relay)
+	data_str = data_str.replace("'","")
+	data = json.loads(data_str)
+	return data
+
+def findRelayCategory(relay):
+	aux = relay.strip().split('-')
+	cat = "unknown"
+	if aux[0].upper()=="P":
+		cat="power"
+	if aux[0].upper()=="S":
+		cat="switch"
+	
+	return cat
+
 def allStop(relays):
 	digitalWrite(ALL, LOW)
 	options = relays.options("power")
 	for option in options:
-		relays.set("power", option, LOW)
+		data = getRelayData(relays,"power",option)
+		data['value']=LOW
+		data = "'" + json.dumps(data) + "'"
+		relays.set("power", option, data)
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
@@ -59,10 +80,22 @@ def allStart(relays):
 	digitalWrite(ALL, HIGH)
 	options = relays.options("power")
 	for option in options:
-		relays.set("power", option, HIGH)
+		data = getRelayData(relays,"power",option)
+		data['value']=HIGH
+		data = "'" + json.dumps(data) + "'"
+		relays.set("power", option, data)
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
+
+# Write the status permanently
+def writeRelayStatus(relays, category, relay, value):
+	data = getRelayData(relays,category,relay)
+	data['value']=value
+	data = "'" + json.dumps(data) + "'"
+	relays.set(category, relay, data)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
 
 
 def relayHigh(relays, category, relay):
@@ -73,18 +106,9 @@ def relayLow(relays, category, relay):
 	digitalWrite(relay, LOW)
 	writeRelayStatus(relays, category, relay, LOW)
 
-#Function to know the current status
-def getCurrentStatus(relays, category, relay):
-	return relays.get(category, relay)
-
-# Write the status permanently
-def writeRelayStatus(relays, category, relay, value):
-	relays.set(category, relay, value)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
 
 #Get the method and the relay from command line
-if len(sys.argv) < 4:
+if len(sys.argv) < 3:
     relaylib.log("ERROR","Incorrect number of arguments to run the program")
     sys.exit(1)
 
@@ -93,17 +117,16 @@ relays = ConfigParser.RawConfigParser()
 relays.read('relays.ini')
 
 method = sys.argv[1]
-category = sys.argv[2]
-relay = sys.argv[3]
-
+relay = sys.argv[2]
+category = findRelayCategory(relay)
 shiftRegisters(1)
 
 # Define actione based on method received
 if method=="toggle":
-	status = getCurrentStatus(relays, category, relay)
-	if status == LOW:
+	data = getRelayData(relays, category, relay)
+	if data['value'] == LOW:
 		relayHigh(relays, category, relay)
-	if status == HIGH:
+	if data['value'] == HIGH:
 		relayLow(relays, category, relay)
 
 if method=="allstop":

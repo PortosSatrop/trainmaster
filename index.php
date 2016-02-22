@@ -45,6 +45,20 @@ function Notused_toggleDevice(device){
 }
 */
 
+function getRelayCategory(relay){
+	//this function could never be used
+	var v = relay.split("-");
+	var cat = "unknown";
+	if (v[0] == "P"){
+		cat="power";
+	}
+	if (v[0] == "S"){
+		cat="switch";
+	}
+	return cat;
+	
+}
+
 function sendMessage (data){
 	var xhttp;
 
@@ -62,22 +76,24 @@ function sendMessage (data){
 
 }
 
-function toggleDevice(cat, device){
-	var info = '{"device":"'+ device + '","category":"'+ cat + '"}';
+function toggleDevice(device){
 	var method = 'toggle';
-	var data = "service.php?method=" + method + "&info=" + info;   
+	var info = '{"device":"'+ device + '","method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   
 	return sendMessage(data);
 }
 
 function allStop(){
-	var method = 'allstop';
-	var data = 'service.php?method=' + method;   
+	var method = 'allstop';	
+	var info = '{"method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   
 	alert(sendMessage(data));
 }
 
 function allStart(){
 	var method = 'allstart';
-	var data = 'service.php?method=' + method;   
+	var info = '{"method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   
 	alert(sendMessage(data));
 }
 
@@ -100,16 +116,7 @@ image.mapster({
         },
 
         onClick: function (e) {
-		var rel = e.key;
-		var v = rel.split("-");
-		var cat;
-		if (v[0] == "P"){
-			cat="power";
-		}
-		if (v[0] == "S"){
-			cat="switch";
-		}
-		var resp = toggleDevice(cat,v[1]);
+		var resp = toggleDevice(e.key);
         },
 
 });
@@ -122,17 +129,28 @@ $('#Lallstop').click(function(){
 	return false;
 });
 $('#Lallstart').click(function(){ 
-	/*
-	var opts = {};
-	var opts = image.mapster('get_options');
-	image.mapster(opts);
-	*/
 	allStart();
 	//image.mapster('set',true,'P-REL01');
 	var neKeys = image.mapster('keys','all');
 	image.mapster('set', true, neKeys);
 	return false; 
 });
+
+//Capture start and stop events of the different circuits
+$('#LstartA').click(function(){ 
+	//startA();
+	var neKeys = image.mapster('keys','circA');
+	image.mapster('set', true, neKeys);
+	return false; 
+});
+$('#LstopA').click(function(){ 
+	//stopA();
+	var neKeys = image.mapster('keys','circA');
+	image.mapster('set', false, neKeys);
+	return false; 
+});
+
+
 
 //Change maps size dynamically
 $('#innerDecrease').click(function(){ innerSize(0.9); return false; });
@@ -196,17 +214,36 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 	<div class="row">
 			<div class="panel panel-default"><a name="inner"></a>
 				<div class="panel-heading">Inner Circuit</div>
-				<div class="panel-body">
+				<div class="panel-body" style="float: left; margin: 0px 30px 0px 0px;">
 					<a id="innerIncrease" href="#"><img src="img/map_increase.png"></a>&nbsp;
 					<a id="innerDecrease" href="#"><img src="img/map_decrease.png"></a>
 					<br /><br />
 					<img width="<?php print_r($configv["mapwidth"])?>%" src="map/train1.png" usemap="#train1" border="0" id="innermap">
 					<map name="train1" id="train1_map">
-						<area shape="circle" coords="228,44,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="P-REL01,all">
-						<area shape="circle" coords="228,108,<?php print_r($configv["electric_light_width"])?>" href="#" data-key="P-REL02,all">
+					<?php
+					foreach($vRelays['power'] as $r=>$info) {
+						$jinfo = json_decode($info);
+						$coord = $jinfo->{"coord"};
+						$text = '<area shape="circle" coords="'.$coord.','.$configv["electric_light_width"].'" href="#" data-key="'.$r.',all,circB">';
+						print_r($text);
+
+					}					
+					?>
 					</map>
 
 				</div>
+				<div style="margin: 70px 0px 0px 70px;">
+                			<ul>
+                    				<li><a id="LstartA" href="#">Start A</a></li>
+                    				<li><a id="LstopA" href="#">Stop A</a></li>
+					</ul>   	
+					<ul>
+						<li><a>Start B</a>
+						<li><a>Stop B</a>
+					</ul>
+	
+				</div>
+				<br style="clear:both" />
 			</div>
 			<div class="panel panel-default"><a name="outer"></a>
 				<div class="panel-heading">Outer Circuit</div>

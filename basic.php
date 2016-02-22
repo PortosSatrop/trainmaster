@@ -2,6 +2,9 @@
 
 <?php
 global $configv;
+global $vRelays;
 $configv = parse_ini_file("config.ini");
+
+$vRelays = parse_ini_file("relays.ini",true);
 
 ?>
