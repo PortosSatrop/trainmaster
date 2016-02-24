@@ -28,7 +28,7 @@ import ConfigParser
 import json
 #import shiftpi
 
-relaylib.log("INFO","Starting...")
+#relaylib.log("INFO","Starting...")
 
 HIGH = "HIGH"
 LOW = "LOW"
@@ -38,9 +38,12 @@ def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
 	#shiftpi.delay(ms)
 
-def digitalWrite(relay, value):
-	print "Puting " + str(relay) + " to " + value
-	# Transfor relay id into a register output
+def digitalWrite(relays, category, relay, value):
+	# Transform relay id into a register output
+	data = getRelayData(relays,category,relay)
+	pin = data['registerPin']
+	print "Puting " + str(relay) + " (pin " + pin + ") to " + value
+
 
 """	if value==HIGH:
 		value = shiftpi.HIGH
@@ -49,7 +52,7 @@ def digitalWrite(relay, value):
 	if pin==ALL:
 		pin = shiftpi.ALL
 
-	shiftpi.digitalWrite(pin, value)
+	shiftpi.digitalWrite(int(pin), value)
 """
 def shiftRegisters(number):
 	print "Using " + str(number) + " register(s)"
@@ -75,35 +78,9 @@ def findRelayCategory(relay):
 	
 	return cat
 
-# Stop all Power Relays
-def allStop(relays):
-	digitalWrite(ALL, LOW)
-	options = relays.options("power")
-	for option in options:
-		data = getRelayData(relays,"power",option)
-		data['value']=LOW
-		data = "'" + json.dumps(data) + "'"
-		relays.set("power", option, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
-
-
-# Start all power relays
-def allStart(relays):
-	digitalWrite(ALL, HIGH)
-	options = relays.options("power")
-	for option in options:
-		data = getRelayData(relays,"power",option)
-		data['value']=HIGH
-		data = "'" + json.dumps(data) + "'"
-		relays.set("power", option, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
-
-
 # Set the relay value
 def setRelayValue(relays, category, relay, value):
-	digitalWrite(relay, value)	
+	digitalWrite(relays, category, relay, value)	
 	data = getRelayData(relays,category,relay)
 	data['value']=value
 	data = "'" + json.dumps(data) + "'"
@@ -111,37 +88,53 @@ def setRelayValue(relays, category, relay, value):
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
+# Start or Stop all Power Relays
+def setAllPowerRelays(relays,value):
+	category = "power"
+	vRelays = relays.options(category)
+	for relay in vRelays:
+		digitalWrite(relays, category, relay, value)	
+		data = getRelayData(relays, category, relay)
+		data['value']=value
+		data = "'" + json.dumps(data) + "'"
+		relays.set(category, relay, data)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
+
 # Start a specific circuit
 def startCircuit(relays, circuit):
+	category = "power"
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
-		digitalWrite(relay, HIGH)	
-		data = getRelayData(relays,"power",relay)
+		digitalWrite(relays, category, relay, HIGH)	
+		data = getRelayData(relays,category,relay)
 		data['value']=HIGH
 		data = "'" + json.dumps(data) + "'"
-		relays.set("power", relay, data)
+		relays.set(category, relay, data)
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
 # Stop a specific circuit
 def stopCircuit(relays, circuit):
+	category = "power"
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
-		digitalWrite(relay, LOW)	
-		data = getRelayData(relays,"power",relay)
+		digitalWrite(relays, category, relay, LOW)	
+		data = getRelayData(relays,category,relay)
 		data['value']=LOW
 		data = "'" + json.dumps(data) + "'"
-		relays.set("power", relay, data)
+		relays.set(category, relay, data)
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
 
 
 def getRelaysInCircuit(relays,circuit):
-	options = relays.options("power")
+	category = "power"
+	options = relays.options(category)
 	relaysCirc = []
 	for option in options:
-		data = getRelayData(relays,"power",option)
+		data = getRelayData(relays,category,option)
 		if data['circuit'] == circuit:
 			relaysCirc.append(option)
 
@@ -175,11 +168,11 @@ if method=="toggle":
 
 # Stop all Power Relays
 if method=="allstop":
-	allStop(relays)
+	setAllPowerRelays(relays,LOW)
 
 # Start all power relays
 if method=="allstart":
-	allStart(relays)
+	setAllPowerRelays(relays,HIGH)
 
 # Start a specific Circuit
 if method=="startcircuit":
