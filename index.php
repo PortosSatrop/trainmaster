@@ -97,6 +97,23 @@ function allStart(){
 	alert(sendMessage(data));
 }
 
+function startCircuit(circuit){
+	var method = 'startcircuit';
+	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
+	var data = "service.php?info=" + info;   
+	alert(sendMessage(data));
+}
+
+function stopCircuit(circuit){
+	var method = 'stopcircuit';
+	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
+	var data = "service.php?info=" + info;   
+	alert(sendMessage(data));
+}
+
+
+
+
 function innerSize(size){
 	var w = $('#innermap').width();
 	w = w*size;
@@ -138,17 +155,31 @@ $('#Lallstart').click(function(){
 
 //Capture start and stop events of the different circuits
 $('#LstartA').click(function(){ 
-	//startA();
+	startCircuit("A");
 	var neKeys = image.mapster('keys','circA');
 	image.mapster('set', true, neKeys);
 	return false; 
 });
 $('#LstopA').click(function(){ 
-	//stopA();
+	stopCircuit("A");
 	var neKeys = image.mapster('keys','circA');
 	image.mapster('set', false, neKeys);
 	return false; 
 });
+
+$('#LstartB').click(function(){ 
+	startCircuit("B");
+	var neKeys = image.mapster('keys','circB');
+	image.mapster('set', true, neKeys);
+	return false; 
+});
+$('#LstopB').click(function(){ 
+	stopCircuit("B");
+	var neKeys = image.mapster('keys','circB');
+	image.mapster('set', false, neKeys);
+	return false; 
+});
+
 
 
 
@@ -239,15 +270,15 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
                     				<li><a id="LstopA" href="#">Stop A</a></li>
 					</ul>   	
 					<ul>
-						<li><a>Start B</a>
-						<li><a>Stop B</a>
+						<li><a id="LstartB" href="#">Start B</a></li>
+                    				<li><a id="LstopB" href="#">Stop B</a></li>
 					</ul>
 	
 				</div>
 				<br style="clear:both" />
 			</div>
 			<div class="panel panel-default"><a name="outer"></a>
-				<div class="panel-heading">Outer Circuit</div>
+				<div class="panel-heading">Outer Circuit - not functional</div>
 				<div class="panel-body">
 					<img width="<?php print_r($configv["mapwidth"])?>%" src="map/train2.png" usemap="#train2" border="0" id="outermap">
 					<map name="train2">

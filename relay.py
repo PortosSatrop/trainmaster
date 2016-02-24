@@ -2,14 +2,15 @@
 # Name:			relay
 # Purpose		This program interfaces from TrainMaster UI service.php to the Raspberry Pi
 # Arguments list:	method = toggle | allstop | allstart
-#			relay = relay code. Example P-REL01
+#			relay = relay code. Example P-REL01 OR circuit = Circuit code "A", "B", "C"
 #
 # Author:		Manuel
 # Shift register pinout :
 #	SER = 25 (GPIO RPI) #pin 14 on the 75HC595
 #	RCLK = 24 (GPIO RPI) #pin 12 on the 75HC595
 #	SRCLK = 23 (GPIO RPI) #pin 11 on the 75HC595
-
+# 
+# https://github.com/mignev/shiftpi
 
 
 """ Note this is simple GPIO example wihtout shift register
@@ -25,25 +26,34 @@ import relaylib
 import sys
 import ConfigParser
 import json
-#from shiftpi import HIGH, LOW, digitalWrite, delay
+#import shiftpi
 
 relaylib.log("INFO","Starting...")
 
-#### Dummy functions to replace Shifypi's until its installed in the Raspberry Pi, comment from here...
 HIGH = "HIGH"
 LOW = "LOW"
 ALL = "ALL"
 
 def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
+	#shiftpi.delay(ms)
 
-def digitalWrite(pin, value):
-	print "Puting " + str(pin) + " to " + value
+def digitalWrite(relay, value):
+	print "Puting " + str(relay) + " to " + value
+	# Transfor relay id into a register output
 
+"""	if value==HIGH:
+		value = shiftpi.HIGH
+	if value==LOW:
+		value = shiftpi.LOW
+	if pin==ALL:
+		pin = shiftpi.ALL
+
+	shiftpi.digitalWrite(pin, value)
+"""
 def shiftRegisters(number):
 	print "Using " + str(number) + " register(s)"
-
-#### comment until here
+	#shiftpi.shiftRegisters(number)
 
 # Helpful methods
 
@@ -54,6 +64,7 @@ def getRelayData(relays,cat,relay):
 	data = json.loads(data_str)
 	return data
 
+# Return based on the id the category: power or switch
 def findRelayCategory(relay):
 	aux = relay.strip().split('-')
 	cat = "unknown"
@@ -64,6 +75,7 @@ def findRelayCategory(relay):
 	
 	return cat
 
+# Stop all Power Relays
 def allStop(relays):
 	digitalWrite(ALL, LOW)
 	options = relays.options("power")
@@ -76,6 +88,7 @@ def allStop(relays):
 	    relays.write(relayfile)
 
 
+# Start all power relays
 def allStart(relays):
 	digitalWrite(ALL, HIGH)
 	options = relays.options("power")
@@ -88,8 +101,9 @@ def allStart(relays):
 	    relays.write(relayfile)
 
 
-# Write the status permanently
-def writeRelayStatus(relays, category, relay, value):
+# Set the relay value
+def setRelayValue(relays, category, relay, value):
+	digitalWrite(relay, value)	
 	data = getRelayData(relays,category,relay)
 	data['value']=value
 	data = "'" + json.dumps(data) + "'"
@@ -97,14 +111,42 @@ def writeRelayStatus(relays, category, relay, value):
 	with open('relays.ini', 'wb') as relayfile:
 	    relays.write(relayfile)
 
+# Start a specific circuit
+def startCircuit(relays, circuit):
+	relaysCirc = getRelaysInCircuit(relays,circuit)
+	for relay in relaysCirc:
+		digitalWrite(relay, HIGH)	
+		data = getRelayData(relays,"power",relay)
+		data['value']=HIGH
+		data = "'" + json.dumps(data) + "'"
+		relays.set("power", relay, data)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
 
-def relayHigh(relays, category, relay):
-	digitalWrite(relay, HIGH)
-	writeRelayStatus(relays, category, relay, HIGH)
-	
-def relayLow(relays, category, relay):
-	digitalWrite(relay, LOW)
-	writeRelayStatus(relays, category, relay, LOW)
+# Stop a specific circuit
+def stopCircuit(relays, circuit):
+	relaysCirc = getRelaysInCircuit(relays,circuit)
+	for relay in relaysCirc:
+		digitalWrite(relay, LOW)	
+		data = getRelayData(relays,"power",relay)
+		data['value']=LOW
+		data = "'" + json.dumps(data) + "'"
+		relays.set("power", relay, data)
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
+
+
+
+def getRelaysInCircuit(relays,circuit):
+	options = relays.options("power")
+	relaysCirc = []
+	for option in options:
+		data = getRelayData(relays,"power",option)
+		if data['circuit'] == circuit:
+			relaysCirc.append(option)
+
+	return relaysCirc
+
 
 
 #Get the method and the relay from command line
@@ -117,22 +159,35 @@ relays = ConfigParser.RawConfigParser()
 relays.read('relays.ini')
 
 method = sys.argv[1]
-relay = sys.argv[2]
-category = findRelayCategory(relay)
+
 shiftRegisters(1)
 
-# Define actione based on method received
+### Define actione based on method received
+# toggle the value of a specific relay
 if method=="toggle":
+	relay = sys.argv[2]
+	category = findRelayCategory(relay)
 	data = getRelayData(relays, category, relay)
 	if data['value'] == LOW:
-		relayHigh(relays, category, relay)
+		setRelayValue(relays, category, relay, HIGH)
 	if data['value'] == HIGH:
-		relayLow(relays, category, relay)
+		setRelayValue(relays, category, relay, LOW)
 
+# Stop all Power Relays
 if method=="allstop":
 	allStop(relays)
 
+# Start all power relays
 if method=="allstart":
 	allStart(relays)
 
+# Start a specific Circuit
+if method=="startcircuit":
+	circuit = sys.argv[2]
+	startCircuit(relays, circuit)
+
+# Stop a specific Circuit
+if method=="stopcircuit":
+	circuit = sys.argv[2]
+	stopCircuit(relays, circuit)
 

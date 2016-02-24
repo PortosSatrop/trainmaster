@@ -6,7 +6,7 @@
 
 		$_GET['format'] = [ json | html | xml ]
 		$_GET['info'] = JSON
-		JSON method = [ toggle | allstop | allstart]
+		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit ]
 		JSON device = P-REL01 for example
 
 	Output: A formatted HTTP response
@@ -149,8 +149,6 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 	$response['code'] = 5;
 }else{
 	$method = $info->method;
-	$device = $info->device;
-
 
 	// Method Say Hello to the API
 	if( strcasecmp($method,'hello') == 0){
@@ -161,6 +159,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 
 	// Method Toggle device
 	if( strcasecmp($method,'toggle') == 0){
+		$device = $info->device;
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
 		$result = shell_exec("python relay.py ".$method." ".$device);
@@ -175,7 +174,6 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$response['data'] = $result;
 	}
 	
-	
 	// Method to enable all
 	if( strcasecmp($method,'allstart') == 0){
 		$response['code'] = 1;
@@ -183,6 +181,26 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$result = shell_exec("python relay.py ".$method." dummy");
 		$response['data'] = $result;
 	}
+	
+	// Method to enable a specific Circuit
+	if( strcasecmp($method,'startcircuit') == 0){
+		$circuit = $info->circuit;
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." ".$circuit);
+		$response['data'] = $result;
+	}
+	
+	// Method to stop a specific Circuit
+	if( strcasecmp($method,'stopcircuit') == 0){
+		$circuit = $info->circuit;
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." ".$circuit);
+		$response['data'] = $result;
+	}
+
+
 	
 }
 // --- Step 4: Deliver Response
