@@ -6,8 +6,8 @@
 
 		$_GET['format'] = [ json | html | xml ]
 		$_GET['info'] = JSON
-		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit ]
-		JSON device = P-REL01 for example
+		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit | getrelaysstatus]
+		JSON device = [P-REL01 for example] or [JSON category = power for example] or [ JSON circuit = A for exmaple ]
 
 	Output: A formatted HTTP response
 
@@ -199,6 +199,15 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$result = shell_exec("python relay.py ".$method." ".$circuit);
 		$response['data'] = $result;
 	}
+	
+	// Method to get the status of a relay of a category : power or switch
+	if( strcasecmp($method,'getrelaysstatus') == 0){
+		$category = $info->category;
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." ".$category);
+		$response['data'] = $result;
+	}
 
 
 	
@@ -209,4 +218,3 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 deliver_response($_GET['format'], $response);
 
 ?>
-  

@@ -1,8 +1,8 @@
 #-------------------------------------------------------------------------------
 # Name:			relay
 # Purpose		This program interfaces from TrainMaster UI service.php to the Raspberry Pi
-# Arguments list:	method = toggle | allstop | allstart
-#			relay = relay code. Example P-REL01 OR circuit = Circuit code "A", "B", "C"
+# Arguments list:	method = toggle | allstop | allstart | startcircuit | stopcircuit | getrelaysstatus]
+#			<arg 2> = [P-REL01 for example] or [category = power for example] or [circuit = A for exmaple] 
 #
 # Author:		Manuel
 # Shift register pinout :
@@ -55,7 +55,8 @@ def digitalWrite(relays, category, relay, value):
 	shiftpi.digitalWrite(int(pin), value)
 """
 def shiftRegisters(number):
-	print "Using " + str(number) + " register(s)"
+	return 1
+	##print "Using " + str(number) + " register(s)"
 	#shiftpi.shiftRegisters(number)
 
 # Helpful methods
@@ -141,6 +142,19 @@ def getRelaysInCircuit(relays,circuit):
 	return relaysCirc
 
 
+def getRelaysStatus(relays,category):
+	vRelays = relays.options(category)
+	sOut = '{"relays":['
+	for relay in vRelays:
+		data = getRelayData(relays,category,relay)
+		sOut = sOut + '{"id":"' + relay + '", "value":"' + data['value'] + '"},'
+	# I need to remove the last ,
+	sOut = sOut[:-1]
+	sOut = sOut + ']}'
+	return sOut
+
+
+
 
 #Get the method and the relay from command line
 if len(sys.argv) < 3:
@@ -183,4 +197,11 @@ if method=="startcircuit":
 if method=="stopcircuit":
 	circuit = sys.argv[2]
 	stopCircuit(relays, circuit)
+
+# Return relay status of the specified category
+if method=="getrelaysstatus":
+	category = sys.argv[2]
+	out = getRelaysStatus(relays, category)
+	print out
+
 

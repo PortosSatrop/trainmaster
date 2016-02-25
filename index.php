@@ -26,6 +26,9 @@ var default_active_color = "00FF00";
 var default_inactive_color = "FF0000";
 var default_color = "FFFFFF";
 
+//Hidden by default
+$('#debug').hide();
+
 /* USING AJAX
 function Notused_toggleDevice(device){
 	var info = '{"device":"'+ device + '"}';
@@ -44,6 +47,11 @@ function Notused_toggleDevice(device){
 
 }
 */
+
+function showLog(txt){
+	txt = txt.replace("\\n","<br />");
+	$('#debugtxt').html(txt);
+}
 
 function getRelayCategory(relay){
 	//this function could never be used
@@ -80,38 +88,41 @@ function toggleDevice(device){
 	var method = 'toggle';
 	var info = '{"device":"'+ device + '","method":"'+ method + '"}';
 	var data = "service.php?info=" + info;   
-	return sendMessage(data);
+	data = sendMessage(data);
+	showLog(data);
 }
 
 function allStop(){
 	var method = 'allstop';	
 	var info = '{"method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   
-	alert(sendMessage(data));
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
 }
 
 function allStart(){
 	var method = 'allstart';
 	var info = '{"method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   
-	alert(sendMessage(data));
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
 }
 
 function startCircuit(circuit){
 	var method = 'startcircuit';
 	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
-	var data = "service.php?info=" + info;   
-	alert(sendMessage(data));
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
 }
 
 function stopCircuit(circuit){
 	var method = 'stopcircuit';
 	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
-	var data = "service.php?info=" + info;   
-	alert(sendMessage(data));
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
 }
-
-
 
 
 function innerSize(size){
@@ -181,15 +192,44 @@ $('#LstopB').click(function(){
 });
 
 
+$('#RefreshPowerRelay').click(function(){ 
+	//Get the status of the power refresh
+	var method = 'getrelaysstatus';
+	var category = 'power';
+	var info = '{"category":"'+ category + '","method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   
+	var text ="";
+	data = sendMessage(data);
+	// I receive a Json and remove first all backslash
+	var obj = JSON.parse(data);
+	data = JSON.parse(obj.data);
+	var value = false;
+	for (i = 0; i < data.relays.length; i++) { 
+		value = false;
+		if (data.relays[i].value.toUpperCase()=="HIGH"){
+			value = true;
+		}	
+		image.mapster('set', Boolean(value), data.relays[i].id);
+		text += "Setting to " + value + " to " + data.relays[i].id + "<br>";
+	}
+	showLog(text);
 
+	//Refresh the image map with the values refreshed
+
+	return false; 
+
+});
 
 //Change maps size dynamically
 $('#innerDecrease').click(function(){ innerSize(0.9); return false; });
 $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 
+//Toggle view hide log
+$('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 
+
+//from document ready
 });
-
 </script>
 <style>
         body {
@@ -232,6 +272,8 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
                     <li><a href="#outer">Outer Circuit</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li><a id="RefreshPowerRelay" href="#">Refresh Power Relay</a></li>
+                    <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
                     <li><a id="Lallstart" href="#">All Start!</a></li>
                     <li><a id="Lallstop" href="#">Emergency Stop!</a></li>
                 </ul>
@@ -273,7 +315,7 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 						<li><a id="LstartB" href="#">Start B</a></li>
                     				<li><a id="LstopB" href="#">Stop B</a></li>
 					</ul>
-	
+					<div id="debug"><pre><div id="debugtxt"></div></pre></div>
 				</div>
 				<br style="clear:both" />
 			</div>
