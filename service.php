@@ -200,7 +200,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$response['data'] = $result;
 	}
 	
-	// Method to get the status of a relay of a category : power or switch
+	// Method to get the status of a relay of a category : power or turnout
 	if( strcasecmp($method,'getrelaysstatus') == 0){
 		$category = $info->category;
 		$response['code'] = 1;

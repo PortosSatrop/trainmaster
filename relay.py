@@ -68,14 +68,14 @@ def getRelayData(relays,cat,relay):
 	data = json.loads(data_str)
 	return data
 
-# Return based on the id the category: power or switch
+# Return based on the id the category: power or turnout
 def findRelayCategory(relay):
 	aux = relay.strip().split('-')
 	cat = "unknown"
 	if aux[0].upper()=="P":
 		cat="power"
-	if aux[0].upper()=="S":
-		cat="switch"
+	if aux[0].upper()=="T":
+		cat="turnout"
 	
 	return cat
 

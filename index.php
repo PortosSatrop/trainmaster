@@ -25,6 +25,7 @@ $(document).ready(function ()
 var default_active_color = "00FF00";
 var default_inactive_color = "FF0000";
 var default_color = "FFFFFF";
+var turnout_active_color = "FFFF00";
 
 //Hidden by default
 $('#debug').hide();
@@ -57,11 +58,11 @@ function getRelayCategory(relay){
 	//this function could never be used
 	var v = relay.split("-");
 	var cat = "unknown";
-	if (v[0] == "P"){
+	if (v[0].toUpperCase() == "P"){
 		cat="power";
 	}
-	if (v[0] == "S"){
-		cat="switch";
+	if (v[0].toUpperCase() == "T"){
+		cat="turnout";
 	}
 	return cat;
 	
@@ -145,21 +146,33 @@ image.mapster({
 
         onClick: function (e) {
 		var resp = toggleDevice(e.key);
+		var cat = getRelayCategory(e.key);
+		if (cat=="turnout"){
+			image.mapster('set_options', { 
+	                areas: [{
+        	            key: e.key,
+                	    render_select: {fillColor: turnout_active_color}
+	                    }]
+
+        	        });
+		}
         },
 
 });
 
 //Capture the EMERGENCY STOP and the ALL START
 $('#Lallstop').click(function(){ 
-	var opts = image.mapster('get_options');
+	//var opts = image.mapster('get_options');
+	//image.mapster(opts); //do not use, it will remove turnouts as well
 	allStop();
-	image.mapster(opts);
+	var neKeys = image.mapster('keys','power-all');
+	image.mapster('set', false, neKeys);
 	return false;
 });
 $('#Lallstart').click(function(){ 
 	allStart();
 	//image.mapster('set',true,'P-REL01');
-	var neKeys = image.mapster('keys','all');
+	var neKeys = image.mapster('keys','power-all');
 	image.mapster('set', true, neKeys);
 	return false; 
 });
@@ -294,14 +307,25 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 					<img width="<?php print_r($configv["mapwidth"])?>%" src="map/train1.png" usemap="#train1" border="0" id="innermap">
 					<map name="train1" id="train1_map">
 					<?php
+					//Display the Power relays
 					foreach($vRelays['power'] as $r=>$info) {
 						$jinfo = json_decode($info);
 						$coord = $jinfo->{"coord"};
 						$circuit = "circ".$jinfo->{"circuit"};
-						$text = '<area shape="circle" coords="'.$coord.','.$configv["electric_light_width"].'" href="#" data-key="'.$r.',all,'.$circuit.'">';
+						$text = '<area shape="circle" coords="'.$coord.','.$configv["power_electric_light_width"].'" href="#" data-key="'.$r.',power-all,'.$circuit.'">';
+						print_r($text);
+
+					}
+			
+					//Display the turnout relays
+					foreach($vRelays['turnout'] as $r=>$info) {
+						$jinfo = json_decode($info);
+						$coord = $jinfo->{"coord"};
+						$text = '<area shape="circle" coords="'.$coord.','.$configv["turnout_electric_light_width"].'" href="#" data-key="'.$r.',turnout-all">';
 						print_r($text);
 
 					}					
+						
 					?>
 					</map>
 
