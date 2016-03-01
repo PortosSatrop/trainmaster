@@ -33,6 +33,9 @@ import json
 HIGH = "HIGH"
 LOW = "LOW"
 ALL = "ALL"
+STRAIGHT = "STRAIGHT"
+DEVIATE = "DEVIATE"
+DEVIATE1 = "DEVIATE1" #This is used for a 3 or 4 way turnout
 
 def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
@@ -76,7 +79,9 @@ def findRelayCategory(relay):
 		cat="power"
 	if aux[0].upper()=="T":
 		cat="turnout"
-	
+	if aux[0].upper()=="D":
+		cat="direction"
+
 	return cat
 
 # Set the relay value
@@ -86,62 +91,9 @@ def setRelayValue(relays, category, relay, value):
 	data['value']=value
 	data = "'" + json.dumps(data) + "'"
 	relays.set(category, relay, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
+	return relays
 
-# Start or Stop all Power Relays
-def setAllPowerRelays(relays,value):
-	category = "power"
-	vRelays = relays.options(category)
-	for relay in vRelays:
-		digitalWrite(relays, category, relay, value)	
-		data = getRelayData(relays, category, relay)
-		data['value']=value
-		data = "'" + json.dumps(data) + "'"
-		relays.set(category, relay, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
-
-# Start a specific circuit
-def startCircuit(relays, circuit):
-	category = "power"
-	relaysCirc = getRelaysInCircuit(relays,circuit)
-	for relay in relaysCirc:
-		digitalWrite(relays, category, relay, HIGH)	
-		data = getRelayData(relays,category,relay)
-		data['value']=HIGH
-		data = "'" + json.dumps(data) + "'"
-		relays.set(category, relay, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
-
-# Stop a specific circuit
-def stopCircuit(relays, circuit):
-	category = "power"
-	relaysCirc = getRelaysInCircuit(relays,circuit)
-	for relay in relaysCirc:
-		digitalWrite(relays, category, relay, LOW)	
-		data = getRelayData(relays,category,relay)
-		data['value']=LOW
-		data = "'" + json.dumps(data) + "'"
-		relays.set(category, relay, data)
-	with open('relays.ini', 'wb') as relayfile:
-	    relays.write(relayfile)
-
-
-
-def getRelaysInCircuit(relays,circuit):
-	category = "power"
-	options = relays.options(category)
-	relaysCirc = []
-	for option in options:
-		data = getRelayData(relays,category,option)
-		if data['circuit'] == circuit:
-			relaysCirc.append(option)
-
-	return relaysCirc
-
-
+# Returns the status of all the relays of the corresponding category
 def getRelaysStatus(relays,category):
 	vRelays = relays.options(category)
 	sOut = '{"relays":['
@@ -153,17 +105,135 @@ def getRelaysStatus(relays,category):
 	sOut = sOut + ']}'
 	return sOut
 
+# Stores in the device file the status
+def saveDeviceStatus(relays):
+	with open('relays.ini', 'wb') as relayfile:
+	    relays.write(relayfile)
+
+########################## TURNOUT RELAY SECTION ##################
+
+# In order to activete a turnout the relays must act as a pulse (see value in confi.ini file)
+# To activate a turnout we will use 2 relays that define whether the action will be to go straight or to use a deviation. TODO with a 3 turnout track
+# then we assign each turn out a relay in the return cable "brown"
+
+# Example to activate T-REL01 to deviate
+# Set T-REL01 to HIGH
+
+# Set T-DEV to HIGH
+# Wait for as long as duration of pulse was set
+# Set T-DEV to LOW
+# Set T-REL01 to LOW
 
 
+def setTurnoutValue(relays, category, relay, value, config):
+	
+	cat_dir = "direction"
+	d_str = "d-str"
+	d_dev = "d-dev"
+	d_dev1 = "d-dev1"
+
+	# Get the pulse duration in ms
+	pulse = config.get("config","pulse_duration")
+	
+	# Define the correct directional relay to use based on value
+	if value == STRAIGHT:
+		rel_dir = d_str
+	if value == DEVIATE:
+		rel_dir = d_dev
+	if value == DEVIATE1:
+		rel_dir = d_dev1
+
+	# Set T-REL01 to HIGH
+	setRelayValue(relays, category, relay, HIGH)
+	
+	# Set directional relay to HIGH
+	setRelayValue(relays, cat_dir, rel_dir, HIGH)
+	
+	# Wait for as long as duration of pulse was set
+	delay(pulse)
+
+	# Set directional relay to LOW
+	setRelayValue(relays, cat_dir, rel_dir, LOW)
+
+	# Set T-REL01 to LOW
+	setRelayValue(relays, category, relay, LOW)
+
+	# Save the turnout
+	data = getRelayData(relays,category,relay)
+	data['status']=value
+	data = "'" + json.dumps(data) + "'"
+	relays.set(category, relay, data)
+	return relays
+
+
+########################## END TURNOUT RELAY SECTION ##################
+
+########################## POWER RELAY SECTION ##################
+# Start or Stop all Power Relays
+def setAllPowerRelays(relays,value):
+	category = "power"
+	vRelays = relays.options(category)
+	for relay in vRelays:
+		digitalWrite(relays, category, relay, value)	
+		data = getRelayData(relays, category, relay)
+		data['value']=value
+		data = "'" + json.dumps(data) + "'"
+		relays.set(category, relay, data)
+	return relays
+
+# Start a specific circuit
+def startCircuit(relays, circuit):
+	category = "power"
+	relaysCirc = getRelaysInCircuit(relays,circuit)
+	for relay in relaysCirc:
+		digitalWrite(relays, category, relay, HIGH)	
+		data = getRelayData(relays,category,relay)
+		data['value']=HIGH
+		data = "'" + json.dumps(data) + "'"
+		relays.set(category, relay, data)
+	return relays
+
+# Stop a specific circuit
+def stopCircuit(relays, circuit):
+	category = "power"
+	relaysCirc = getRelaysInCircuit(relays,circuit)
+	for relay in relaysCirc:
+		digitalWrite(relays, category, relay, LOW)	
+		data = getRelayData(relays,category,relay)
+		data['value']=LOW
+		data = "'" + json.dumps(data) + "'"
+		relays.set(category, relay, data)
+	return relays
+
+# Returns an array of relays belonging to a circuit
+def getRelaysInCircuit(relays,circuit):
+	category = "power"
+	options = relays.options(category)
+	relaysCirc = []
+	for option in options:
+		data = getRelayData(relays,category,option)
+		if data['circuit'] == circuit:
+			relaysCirc.append(option)
+
+	return relaysCirc
+
+########################## END POWER RELAY SECTION ##################
+
+
+##########################          MAIN           ##################
 
 #Get the method and the relay from command line
 if len(sys.argv) < 3:
     relaylib.log("ERROR","Incorrect number of arguments to run the program")
     sys.exit(1)
 
+# Read config file
+config = ConfigParser.RawConfigParser()
+config.read('config.ini')
+
 # Getting the status of all the relays
 relays = ConfigParser.RawConfigParser()
-relays.read('relays.ini')
+relays.read(config.get("config","device_file"))
 
 method = sys.argv[1]
 
@@ -175,28 +245,37 @@ if method=="toggle":
 	relay = sys.argv[2]
 	category = findRelayCategory(relay)
 	data = getRelayData(relays, category, relay)
-	if data['value'] == LOW:
-		setRelayValue(relays, category, relay, HIGH)
-	if data['value'] == HIGH:
-		setRelayValue(relays, category, relay, LOW)
+	if category == "power":
+		if data['value'] == LOW:
+			relays = setRelayValue(relays, category, relay, HIGH)
+		if data['value'] == HIGH:
+			relays = setRelayValue(relays, category, relay, LOW)
+	if category == "turnout":
+		if data['status'] == STRAIGHT:
+			relays = setTurnoutValue(relays, category, relay, DEVIATE,  config)
+		if data['status'] == DEVIATE:
+			relays = setTurnoutValue(relays, category, relay, STRAIGHT, config)
+
+# TODO Special case for 3 or 4 way turnout
+
 
 # Stop all Power Relays
 if method=="allstop":
-	setAllPowerRelays(relays,LOW)
+	relays = setAllPowerRelays(relays,LOW)
 
 # Start all power relays
 if method=="allstart":
-	setAllPowerRelays(relays,HIGH)
+	relays = setAllPowerRelays(relays,HIGH)
 
 # Start a specific Circuit
 if method=="startcircuit":
 	circuit = sys.argv[2]
-	startCircuit(relays, circuit)
+	relays = startCircuit(relays, circuit)
 
 # Stop a specific Circuit
 if method=="stopcircuit":
 	circuit = sys.argv[2]
-	stopCircuit(relays, circuit)
+	relays = stopCircuit(relays, circuit)
 
 # Return relay status of the specified category
 if method=="getrelaysstatus":
@@ -205,3 +284,5 @@ if method=="getrelaysstatus":
 	print out
 
 
+# Finally save the status of the devices
+saveDeviceStatus(relays)

@@ -50,7 +50,7 @@ function Notused_toggleDevice(device){
 */
 
 function showLog(txt){
-	txt = txt.replace("\\n","<br />");
+	txt = txt.replace(/\\n/g,"<br />");
 	$('#debugtxt').html(txt);
 }
 
@@ -265,7 +265,16 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 	top: 4em;
 
 	}
-    </style>
+
+	pre {
+	white-space: pre-wrap; /* CSS3 */
+	white-space: -moz-pre-wrap; /* Mozilla, post millennium */
+	white-space: -pre-wrap; /* Opera 4-6 */
+	white-space: -o-pre-wrap; /* Opera 7 */
+	word-wrap: break-word; /* Internet Explorer 5.5+ */
+	}
+
+</style>
 
 </head>
 <body>
