@@ -125,6 +125,13 @@ function stopCircuit(circuit){
 	showLog(data);
 }
 
+function allStraight(){
+	var method = 'allstraight';
+	var info = '{"method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
+}
 
 function innerSize(size){
 	var w = $('#innermap').width();
@@ -233,6 +240,13 @@ $('#RefreshPowerRelay').click(function(){
 
 });
 
+//Capture the All Straight order
+$('#Lallstraight').click(function(){ 
+	allStraight();
+	var neKeys = image.mapster('keys','turnout-all');
+	image.mapster('set', false, neKeys);
+	return false;
+});
 //Change maps size dynamically
 $('#innerDecrease').click(function(){ innerSize(0.9); return false; });
 $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
@@ -294,8 +308,9 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
                     <li><a href="#outer">Outer Circuit</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a id="RefreshPowerRelay" href="#">Refresh Power Relay</a></li>
                     <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
+                    <li><a id="RefreshPowerRelay" href="#">Refresh Power Relay</a></li>
+                    <li><a id="Lallstraight" href="#">All Straight!</a></li>
                     <li><a id="Lallstart" href="#">All Start!</a></li>
                     <li><a id="Lallstop" href="#">Emergency Stop!</a></li>
                 </ul>

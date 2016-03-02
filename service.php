@@ -6,7 +6,7 @@
 
 		$_GET['format'] = [ json | html | xml ]
 		$_GET['info'] = JSON
-		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit | getrelaysstatus]
+		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit | getrelaysstatus | allstraight ]
 		JSON device = [P-REL01 for example] or [JSON category = power for example] or [ JSON circuit = A for exmaple ]
 
 	Output: A formatted HTTP response
@@ -209,6 +209,13 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$response['data'] = $result;
 	}
 
+	// Method to set al turnouts straight
+	if( strcasecmp($method,'allstraight') == 0){
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("python relay.py ".$method." dummy");
+		$response['data'] = $result;
+	}
 
 	
 }

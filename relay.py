@@ -165,6 +165,14 @@ def setTurnoutValue(relays, category, relay, value, config):
 	relays.set(category, relay, data)
 	return relays
 
+# Set all turnouts straight
+def setAllStraight(relays,value):
+	category = "turnout"
+	vRelays = relays.options(category)
+	for relay in vRelays:
+		relays = setTurnoutValue(relays, category, relay, STRAIGHT, config)
+	return relays
+
 
 ########################## END TURNOUT RELAY SECTION ##################
 
@@ -282,6 +290,10 @@ if method=="getrelaysstatus":
 	category = sys.argv[2]
 	out = getRelaysStatus(relays, category)
 	print out
+
+# Set all turnouts straight
+if method=="allstraight":
+	relays = setAllStraight(relays,config)
 
 
 # Finally save the status of the devices
