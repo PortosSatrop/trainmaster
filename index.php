@@ -211,10 +211,11 @@ $('#LstopB').click(function(){
 	return false; 
 });
 
-
-$('#RefreshPowerRelay').click(function(){ 
+$('#RefreshDeviceStatus').click(function(){ 
 	//Get the status of the power refresh
-	var method = 'getrelaysstatus';
+	var method = 'getdevicestatus';
+	
+	// First power devices
 	var category = 'power';
 	var info = '{"category":"'+ category + '","method":"'+ method + '"}';
 	var data = "service.php?info=" + info;   
@@ -224,17 +225,43 @@ $('#RefreshPowerRelay').click(function(){
 	var obj = JSON.parse(data);
 	data = JSON.parse(obj.data);
 	var value = false;
-	for (i = 0; i < data.relays.length; i++) { 
+	for (i = 0; i < data.devices.length; i++) { 
 		value = false;
-		if (data.relays[i].value.toUpperCase()=="HIGH"){
+		if (data.devices[i].value.toUpperCase()=="HIGH"){
 			value = true;
 		}	
-		image.mapster('set', Boolean(value), data.relays[i].id);
-		text += "Setting to " + value + " to " + data.relays[i].id + "<br>";
+		image.mapster('set', Boolean(value), data.devices[i].id);
+		text += "Setting " + value + " to " + data.devices[i].id + "<br>";
+	}
+
+	//Now turnouts
+	var category = 'turnout';
+	var info = '{"category":"'+ category + '","method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   
+	data = sendMessage(data);
+	// I receive a Json and remove first all backslash
+	var obj = JSON.parse(data);
+	data = JSON.parse(obj.data);
+	var value = false;
+	for (i = 0; i < data.devices.length; i++) { 
+		value = false;
+		if (data.devices[i].status.toUpperCase()=="DEVIATE"){
+			value = true;
+		}		
+		image.mapster('set_options', { 
+	                areas: [{
+        	            key: data.devices[i].id,
+                	    render_select: {fillColor: turnout_active_color}
+	                    }]
+
+        	        });
+
+		image.mapster('set', Boolean(value), data.devices[i].id);
+		text += "Setting " + value + " to " + data.devices[i].id + "<br>";
 	}
 	showLog(text);
 
-	//Refresh the image map with the values refreshed
+
 
 	return false; 
 
@@ -287,7 +314,6 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 	white-space: -o-pre-wrap; /* Opera 7 */
 	word-wrap: break-word; /* Internet Explorer 5.5+ */
 	}
-
 </style>
 
 </head>
@@ -302,6 +328,7 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
                 </a>
             </div>
             <div class="collapse navbar-collapse" id="spark-navbar-collapse">
+		<img style="vertical-align:middle" src="img/marklin.png" width="100">
                 <ul class="nav navbar-nav">
                     <li><a href="<?php print_r($configv["home"]);?>/index.php">Home</a></li>
                     <li><a href="#inner">Inner Circuit</a></li>
@@ -309,7 +336,7 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
-                    <li><a id="RefreshPowerRelay" href="#">Refresh Power Relay</a></li>
+                    <li><a id="RefreshDeviceStatus" href="#">Refresh Device Status</a></li>
                     <li><a id="Lallstraight" href="#">All Straight!</a></li>
                     <li><a id="Lallstart" href="#">All Start!</a></li>
                     <li><a id="Lallstop" href="#">Emergency Stop!</a></li>

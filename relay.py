@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Name:			relay
 # Purpose		This program interfaces from TrainMaster UI service.php to the Raspberry Pi
-# Arguments list:	method = toggle | allstop | allstart | startcircuit | stopcircuit | getrelaysstatus]
+# Arguments list:	method = toggle | allstop | allstart | startcircuit | stopcircuit | getdevicestatus | allstraight]
 #			<arg 2> = [P-REL01 for example] or [category = power for example] or [circuit = A for exmaple] 
 #
 # Author:		Manuel
@@ -94,12 +94,15 @@ def setRelayValue(relays, category, relay, value):
 	return relays
 
 # Returns the status of all the relays of the corresponding category
-def getRelaysStatus(relays,category):
+def getDeviceStatus(relays,category):
 	vRelays = relays.options(category)
-	sOut = '{"relays":['
+	sOut = '{"devices":['
 	for relay in vRelays:
 		data = getRelayData(relays,category,relay)
-		sOut = sOut + '{"id":"' + relay + '", "value":"' + data['value'] + '"},'
+		if category == "power":
+			sOut = sOut + '{"id":"' + relay + '", "value":"' + data['value'] + '"},'
+		if category == "turnout":
+			sOut = sOut + '{"id":"' + relay + '", "status":"' + data['status'] + '", "value":"' + data['value'] + '"},'
 	# I need to remove the last ,
 	sOut = sOut[:-1]
 	sOut = sOut + ']}'
@@ -286,9 +289,9 @@ if method=="stopcircuit":
 	relays = stopCircuit(relays, circuit)
 
 # Return relay status of the specified category
-if method=="getrelaysstatus":
+if method=="getdevicestatus":
 	category = sys.argv[2]
-	out = getRelaysStatus(relays, category)
+	out = getDeviceStatus(relays, category)
 	print out
 
 # Set all turnouts straight
