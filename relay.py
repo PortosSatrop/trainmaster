@@ -26,7 +26,7 @@ import relaylib
 import sys
 import ConfigParser
 import json
-#import shiftpi
+import shiftpi.shiftpi as shiftpi
 
 #relaylib.log("INFO","Starting...")
 
@@ -39,28 +39,29 @@ DEVIATE1 = "DEVIATE1" #This is used for a 3 or 4 way turnout
 
 def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
-	#shiftpi.delay(ms)
+	shiftpi.delay(ms)
 
 def digitalWrite(relays, category, relay, value):
 	# Transform relay id into a register output
 	data = getRelayData(relays,category,relay)
 	pin = data['registerPin']
-	print "Puting " + str(relay) + " (pin " + pin + ") to " + value
+	print "Puting " + relay + " (pin " + pin + ") to " + value
+	pin = int(pin)
 
-
-"""	if value==HIGH:
+	if value==HIGH:
 		value = shiftpi.HIGH
 	if value==LOW:
 		value = shiftpi.LOW
 	if pin==ALL:
 		pin = shiftpi.ALL
+	print pin
+	print value
+	shiftpi.digitalWrite(pin, value)
 
-	shiftpi.digitalWrite(int(pin), value)
-"""
 def shiftRegisters(number):
+	#print "Using " + str(number) + " register(s)"
+	shiftpi.shiftRegisters(number)
 	return 1
-	##print "Using " + str(number) + " register(s)"
-	#shiftpi.shiftRegisters(number)
 
 # Helpful methods
 
@@ -232,7 +233,6 @@ def getRelaysInCircuit(relays,circuit):
 
 
 ##########################          MAIN           ##################
-
 #Get the method and the relay from command line
 if len(sys.argv) < 3:
     relaylib.log("ERROR","Incorrect number of arguments to run the program")
