@@ -1,12 +1,12 @@
 Trainmaster
 ===========
-Web UI to control a Marklin train 
+Web UI to control Marklin tracks or any other brand
 
 This application uses python 2 external libs RPi.GPIO and SHIFTPI
 
 https://github.com/mignev/shiftpi
 
-# Steps to deploy
+## Steps to deploy
 
 1) Get this project Duh!
 
