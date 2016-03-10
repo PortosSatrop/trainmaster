@@ -13,15 +13,6 @@
 # https://github.com/mignev/shiftpi
 
 
-""" Note this is simple GPIO example wihtout shift register
-Source http://openmicros.org/index.php/articles/94-ciseco-product-documentation/raspberry-pi/217-getting-started-with-raspberry-pi-gpio-and-python
-
-import RPi.GPIO as GPIO
-GPIO.setup(18, GPIO.OUT)
-GPIO.output(18, False)
-
-"""
-
 import relaylib
 import sys
 import ConfigParser
@@ -32,7 +23,6 @@ import shiftpi.shiftpi as shiftpi
 
 HIGH = "HIGH"
 LOW = "LOW"
-ALL = "ALL"
 STRAIGHT = "STRAIGHT"
 DEVIATE = "DEVIATE"
 DEVIATE1 = "DEVIATE1" #This is used for a 3 or 4 way turnout
@@ -41,22 +31,42 @@ def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
 	shiftpi.delay(ms)
 
+#Transforms the current list of power relays into a dictionary used by dgitialwrite. Mainly used for Power relays.
+def buildDictionaryOfStates(relays,category)
+	data = {}	
+	vRelays = relays.options(category)
+	for relay in vRelays:
+		data = getRelayData(relays, category, relay)
+		pin = data['registerPin']
+		val = getShiftPiValue(data['value'])
+		data[pin] = val
+	return data
+	
+def getShiftPiValue(value):	
+	value = "error"
+	
+	if value==HIGH:
+		value = shiftpi.HIGH
+	if value==LOW:
+		value = shiftpi.LOW
+	return value
+
+# Never used
 def digitalWrite(relays, category, relay, value):
 	# Transform relay id into a register output
 	data = getRelayData(relays,category,relay)
 	pin = data['registerPin']
 	print "Puting " + relay + " (pin " + pin + ") to " + value
 	pin = int(pin)
+	value = getShiftPiValue(value)
+	#shiftpi.digitalWrite(pin, value)
 
-	if value==HIGH:
-		value = shiftpi.HIGH
-	if value==LOW:
-		value = shiftpi.LOW
-	if pin==ALL:
-		pin = shiftpi.ALL
-	print pin
-	print value
-	shiftpi.digitalWrite(pin, value)
+def registerWrite(relays, category):
+	#I get the current states into a dictionary
+	vPins = buildDictionaryOfStates(relays,category)
+	# Set all pins at once with the dictionary: shiftpi.startupMode({1: HIGH, 4: HIGH, 6: HIGH}, True) true: executes (latches)
+	shiftpi.startupMode(vPins, True)
+
 
 def shiftRegisters(number):
 	#print "Using " + str(number) + " register(s)"
@@ -87,8 +97,9 @@ def findRelayCategory(relay):
 
 # Set the relay value
 def setRelayValue(relays, category, relay, value):
-	digitalWrite(relays, category, relay, value)	
 	data = getRelayData(relays,category,relay)
+	pin = data['registerPin']
+	print "Puting " + relay + " (pin " + pin + ") to " + value
 	data['value']=value
 	data = "'" + json.dumps(data) + "'"
 	relays.set(category, relay, data)
@@ -149,18 +160,22 @@ def setTurnoutValue(relays, category, relay, value, config):
 
 	# Set T-REL01 to HIGH
 	setRelayValue(relays, category, relay, HIGH)
+	registerWrite(relays, category)
 	
 	# Set directional relay to HIGH
 	setRelayValue(relays, cat_dir, rel_dir, HIGH)
+	registerWrite(relays, category)
 	
 	# Wait for as long as duration of pulse was set
 	delay(pulse)
 
 	# Set directional relay to LOW
 	setRelayValue(relays, cat_dir, rel_dir, LOW)
+	registerWrite(relays, category)
 
 	# Set T-REL01 to LOW
 	setRelayValue(relays, category, relay, LOW)
+	registerWrite(relays, category)
 
 	# Save the turnout
 	data = getRelayData(relays,category,relay)
@@ -184,38 +199,54 @@ def setAllStraight(relays,value):
 # Start or Stop all Power Relays
 def setAllPowerRelays(relays,value):
 	category = "power"
+	
+	# step 1: Update the device vector
 	vRelays = relays.options(category)
 	for relay in vRelays:
-		digitalWrite(relays, category, relay, value)	
 		data = getRelayData(relays, category, relay)
 		data['value']=value
 		data = "'" + json.dumps(data) + "'"
 		relays.set(category, relay, data)
-	return relays
+	
+	# step 2: Write to the register
+	registerWrite(relays, category)
+
+	return relays	
 
 # Start a specific circuit
 def startCircuit(relays, circuit):
 	category = "power"
+	
+	# step 1: Update the device vector
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
-		digitalWrite(relays, category, relay, HIGH)	
 		data = getRelayData(relays,category,relay)
 		data['value']=HIGH
 		data = "'" + json.dumps(data) + "'"
 		relays.set(category, relay, data)
+		
+	# step 2: Write to the register
+	registerWrite(relays, category)
+	
 	return relays
 
 # Stop a specific circuit
 def stopCircuit(relays, circuit):
 	category = "power"
+	
+	# step 1: Update the device vector
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
-		digitalWrite(relays, category, relay, LOW)	
 		data = getRelayData(relays,category,relay)
 		data['value']=LOW
 		data = "'" + json.dumps(data) + "'"
 		relays.set(category, relay, data)
+	
+	# step 2: Write to the register
+	registerWrite(relays, category)
+	
 	return relays
+
 
 # Returns an array of relays belonging to a circuit
 def getRelaysInCircuit(relays,circuit):
@@ -261,6 +292,8 @@ if method=="toggle":
 			relays = setRelayValue(relays, category, relay, HIGH)
 		if data['value'] == HIGH:
 			relays = setRelayValue(relays, category, relay, LOW)
+	# Write to the registers
+	registerWrite(relays, category)
 	if category == "turnout":
 		if data['status'] == STRAIGHT:
 			relays = setTurnoutValue(relays, category, relay, DEVIATE,  config)
