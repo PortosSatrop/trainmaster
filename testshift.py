@@ -1,12 +1,14 @@
 #import shiftpi
 import shiftpi.shiftpi as shiftpi
 
+shiftpi.shiftRegisters(2) 
+
 # turns shift register's pin 0 to HIGH
 shiftpi.digitalWrite(0, shiftpi.HIGH)
 shiftpi.delay(1000)
 
 # turns shift register's pin 1 to HIGH
-shiftpi.digitalWrite(1, shiftpi.HIGH)
+shiftpi.digitalWrite(12, shiftpi.HIGH)
 shiftpi.delay(1000)
 
 # turns shift register's pin 0 to LOW
@@ -25,7 +27,7 @@ shiftpi.delay(1000)
 
 
 # turns shift register's pin 1 to LOW
-shiftpi.digitalWrite(1, shiftpi.LOW)
+shiftpi.digitalWrite(12, shiftpi.LOW)
 shiftpi.delay(1000)
 
 
