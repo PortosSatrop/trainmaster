@@ -32,19 +32,17 @@ def delay(ms):
 	shiftpi.delay(ms)
 
 #Transforms the current list of power relays into a dictionary used by dgitialwrite. Mainly used for Power relays.
-def buildDictionaryOfStates(relays,category)
-	data = {}	
+def buildDictionaryOfStates(relays,category):
+	dict_states = {}	
 	vRelays = relays.options(category)
 	for relay in vRelays:
 		data = getRelayData(relays, category, relay)
-		pin = data['registerPin']
+		pin = int(data['registerPin'])
 		val = getShiftPiValue(data['value'])
-		data[pin] = val
-	return data
+		dict_states[pin] = val
+	return dict_states
 	
-def getShiftPiValue(value):	
-	value = "error"
-	
+def getShiftPiValue(value):
 	if value==HIGH:
 		value = shiftpi.HIGH
 	if value==LOW:
