@@ -3,24 +3,18 @@ import shiftpi.shiftpi as shiftpi
 
 shiftpi.shiftRegisters(1) 
 
-#initialize
 shiftpi.digitalWrite(shiftpi.ALL, shiftpi.LOW)
 shiftpi.delay(1000)
 
-# turns shift register's pin to HIGH
-shiftpi.digitalWrite(0, shiftpi.HIGH)
-shiftpi.delay(500)
+for i in range(0,8):
+	print (i+1)
+	shiftpi.digitalWrite(i, shiftpi.HIGH)
+	shiftpi.delay(500)
 
-shiftpi.digitalWrite(7, shiftpi.HIGH)
-shiftpi.delay(500)
-
-shiftpi.digitalWrite(1, shiftpi.HIGH)
-shiftpi.delay(500)
-
-
-# turns shift register's pin to LOW
-shiftpi.digitalWrite(1, shiftpi.LOW)
-shiftpi.delay(500)
+for i in range(0,8):
+	print (i+1)
+	shiftpi.digitalWrite(i, shiftpi.LOW)
+	shiftpi.delay(500)
 
 
 # turns all shift register pins to HIGH
