@@ -9,7 +9,7 @@ This application uses python 2 external libs RPi.GPIO and SHIFTPI
 Thanks Marian Ignev for this great library!
 
 ## Architecture
-The goal is to control the relays from a nice and easy to use web interface. Using mainly JavaScript and Jquery, upon a click on a track control am http request is sent to itself to consume a webservice `service.php`. This file creates the string to execute a python program `relay.py` from PHP that, using the `shiftpi` library communicates with the GPIO.
+The goal is to control the relays from a nice and easy to use web interface. Using mainly JavaScript and Jquery, upon a click on a track control a http request is sent to itself to consume a webservice `service.php`. This file creates the string to execute a python program `relay.py` from PHP that, using the `shiftpi` library communicates with the GPIO.
 
 JSCRIPT <-> PHP <-> PYTHON <-> Shiftpi <-> GPIO <-> Relays
 
