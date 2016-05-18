@@ -18,7 +18,7 @@ $ git clone  https://github.com/chapunazar/trainmaster.git
 ```
 $ sudo apt-get update && sudo apt-get -y install python-rpi.gpio python-dev
 ```
-Note: If you encounter problems with the GPIO lib, install then python-dev and then manually install the rpi.gpio lib from here
+Note: Only if you encounter problems with the GPIO lib, install then python-dev and then manually install the rpi.gpio lib from here
 https://pypi.python.org/pypi/RPi.GPIO/
 ```
 $ sudo python setup.py install
@@ -38,9 +38,8 @@ $ chmod 666 relays.ini
 5) Need to provide more privileges to www-data to access GPIO.
 ```
 $ sudo visudo
-
-add the line:
 ```
+add the line:
 `www-data ALL=(ALL) NOPASSWD: ALL`
 
 This one is too risky! basically www-data has root access! Cross site-scripting could allow someone to become root by tricking your server into running a command possibly destroying your Pi. Instead you should make a group with
