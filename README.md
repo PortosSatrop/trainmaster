@@ -63,3 +63,6 @@ then add www-data to gpio group
 $ sudo adduser www-data gpio
 ```
 Finally, remove www-data from sudoers!
+
+## Copyright
+Copyright (c) 2016 Manuel Nazar Anchorena. See LICENSE for further details.
