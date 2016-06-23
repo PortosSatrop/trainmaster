@@ -43,7 +43,7 @@ $ sudo python shiftpi/setup.py install
 $ sudo rm -rf shiftpi
 ```
 
-4) Add write permission to relays.ini so web user as www-data may edit the file. example:
+4) Inside trainmaster directory: Add write permission to relays.ini so web user as www-data may edit the file. example:
 ```
 $ chmod 666 relays.ini
 ```
