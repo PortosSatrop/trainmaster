@@ -21,12 +21,17 @@ $ git clone  https://github.com/chapunazar/trainmaster.git
 ```
 
 
-2) Install RPi.GPIO lib
+2) Install Python and RPi.GPIO lib
+If Python is not installed then
+```
+$sudo apt-get install python-dev python3-dev
+```
+Then RPi.GPIO lib
 ```
 $ sudo apt-get update && sudo apt-get -y install python-rpi.gpio python-dev
 ```
 Note: Only if you encounter problems with the GPIO lib, install then python-dev and then manually install the rpi.gpio lib from here
-https://pypi.python.org/pypi/RPi.GPIO/
+https://pypi.python.org/pypi/RPi.GPIO/. Check documentation for installation here as well https://sourceforge.net/p/raspberry-gpio-python/wiki/install/
 ```
 $ sudo python setup.py install
 ```
