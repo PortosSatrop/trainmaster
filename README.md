@@ -24,10 +24,6 @@ $ git clone  https://github.com/chapunazar/trainmaster.git
 2) Install Python-dev and RPi.GPIO lib
 There are several ways to install python, most probably python 2 is there already
 ```
-$sudo apt-get install python-dev
-```
-Then RPi.GPIO lib
-```
 $ sudo apt-get update && sudo apt-get -y install python-rpi.gpio python-dev
 ```
 Note: Only if you encounter problems with the GPIO lib, install then python-dev and then manually install the rpi.gpio lib from here
