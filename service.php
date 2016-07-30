@@ -162,7 +162,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$device = $info->device;
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." ".$device);
+		$result = shell_exec("python relay.py ".$method." ".$device);
 		$response['data'] = $result;
 	}
 	
@@ -170,14 +170,14 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 	if( strcasecmp($method,'allstop') == 0){
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." dummy");
+		$result = shell_exec("python relay.py ".$method." dummy");
 		$response['data'] = $result;
 	}
 	// Method to enable all
 	if( strcasecmp($method,'allstart') == 0){
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." dummy");
+		$result = shell_exec("python relay.py ".$method." dummy");
 		$response['data'] = $result;
 	}
 	
@@ -186,7 +186,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$circuit = $info->circuit;
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." ".$circuit);
+		$result = shell_exec("python relay.py ".$method." ".$circuit);
 		$response['data'] = $result;
 	}
 	
@@ -195,7 +195,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$circuit = $info->circuit;
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." ".$circuit);
+		$result = shell_exec("python relay.py ".$method." ".$circuit);
 		$response['data'] = $result;
 	}
 	
@@ -204,7 +204,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$category = $info->category;
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
-		$result = shell_exec("sudo python relay.py ".$method." ".$category);
+		$result = shell_exec("python relay.py ".$method." ".$category);
 		$response['data'] = $result;
 	}
 
