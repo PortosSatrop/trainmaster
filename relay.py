@@ -25,6 +25,7 @@ import json
 cEnv = ConfigParser.RawConfigParser()
 cEnv.read('.env')
 MODE = cEnv.get("MAIN","APP_ENV")
+
 if MODE == "production":
 	import shiftpi.shiftpi as shiftpi
 
