@@ -213,6 +213,7 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
 		$result = shell_exec("sudo python relay.py ".$method." dummy");
+		var_dump($result);
 		$response['data'] = $result;
 	}
 

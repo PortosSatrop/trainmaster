@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Name:			relay
+# Website:		https://github.com/chapunazar/trainmaster
 # Purpose		This program interfaces from TrainMaster UI service.php to the Raspberry Pi
 # Arguments list:	method = toggle | allstop | allstart | startcircuit | stopcircuit | getdevicestatus | allstraight]
 #			<arg 2> = [P-REL01 for example] or [category = power for example] or [circuit = A for exmaple] 
@@ -10,14 +11,22 @@
 #	RCLK = 24 (GPIO RPI) #pin 12 on the 75HC595
 #	SRCLK = 23 (GPIO RPI) #pin 11 on the 75HC595
 # 
-# https://github.com/mignev/shiftpi
-
+# Thanks mignev for  https://github.com/mignev/shiftpi
+#
+#### INITIALIZE #############
 
 import relaylib
 import sys
 import ConfigParser
 import json
-import shiftpi.shiftpi as shiftpi
+
+
+# Read from .env whether is production or dev
+cEnv = ConfigParser.RawConfigParser()
+cEnv.read('.env')
+MODE = cEnv.get("MAIN","APP_ENV")
+if MODE == "production":
+	import shiftpi.shiftpi as shiftpi
 
 #relaylib.log("INFO","Starting...")
 
@@ -25,11 +34,14 @@ HIGH = "HIGH"
 LOW = "LOW"
 STRAIGHT = "STRAIGHT"
 DEVIATE = "DEVIATE"
-DEVIATE1 = "DEVIATE1" #This is used for a 3 or 4 way turnout
+DEVIATE1 = "DEVIATE1" #This is used for a 3 or 4 way turnout (TODO)
+
+########################
 
 def delay(ms):
 	print "Waiting for " + str(ms) + "ms"
-	shiftpi.delay(ms)
+	if MODE == "production":
+		shiftpi.delay(ms)
 
 #Transforms the current list of power relays into a dictionary used by dgitialwrite. Mainly used for Power relays.
 def buildDictionaryOfStates(relays,category):
@@ -38,18 +50,28 @@ def buildDictionaryOfStates(relays,category):
 	for relay in vRelays:
 		data = getRelayData(relays, category, relay)
 		pin = int(data['registerPin'])
-		val = getShiftPiValue(data['value'])
+		val = getShiftPiValue(category, data['value'])
 		dict_states[pin] = val
 	return dict_states
+
+# For Power relays the values are inversed as the relays when OFF actually connect the switch. This way the unit always powers. So a logical LOW means that the relay is active an the circuit open
+def getShiftPiValue(category,value):
+	if MODE == "production":
+		if category == "power":
+			if value==LOW:
+				value = shiftpi.HIGH
+			if value==HIGH:
+				value = shiftpi.LOW
+		else:		
+			if value==HIGH:
+				value = shiftpi.HIGH
+			if value==LOW:
+				value = shiftpi.LOW
 	
-def getShiftPiValue(value):
-	if value==HIGH:
-		value = shiftpi.HIGH
-	if value==LOW:
-		value = shiftpi.LOW
+
 	return value
 
-# Never used
+# Never used. Was created when the relays were activated one at a time
 def digitalWrite(relays, category, relay, value):
 	# Transform relay id into a register output
 	data = getRelayData(relays,category,relay)
@@ -59,16 +81,21 @@ def digitalWrite(relays, category, relay, value):
 	value = getShiftPiValue(value)
 	#shiftpi.digitalWrite(pin, value)
 
+# The list of relays are written simultaneously to all the shift registers
 def registerWrite(relays, category):
 	#I get the current states into a dictionary
 	vPins = buildDictionaryOfStates(relays,category)
-	# Set all pins at once with the dictionary: shiftpi.startupMode({1: HIGH, 4: HIGH, 6: HIGH}, True) true: executes (latches)
-	shiftpi.startupMode(vPins, True)
+	if MODE == "production":
+		# Set all pins at once with the dictionary: shiftpi.startupMode({1: HIGH, 4: HIGH, 6: HIGH}, True) true: executes (latches)
+		shiftpi.startupMode(vPins, True)
 
 
 def shiftRegisters(number):
-	#print "Using " + str(number) + " register(s)"
-	shiftpi.shiftRegisters(number)
+	if MODE == "production":
+		shiftpi.shiftRegisters(number)
+	else:
+		print "Using " + str(number) + " register(s)"
+
 	return 1
 
 # Helpful methods
@@ -197,7 +224,7 @@ def setAllStraight(relays,value):
 # Start or Stop all Power Relays
 def setAllPowerRelays(relays,value):
 	category = "power"
-	
+	print "Set all " + category + " to " + value
 	# step 1: Update the device vector
 	vRelays = relays.options(category)
 	for relay in vRelays:
@@ -215,6 +242,7 @@ def setAllPowerRelays(relays,value):
 def startCircuit(relays, circuit):
 	category = "power"
 	
+	print "Start " + circuit
 	# step 1: Update the device vector
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
@@ -232,6 +260,7 @@ def startCircuit(relays, circuit):
 def stopCircuit(relays, circuit):
 	category = "power"
 	
+	print "Stop " + circuit
 	# step 1: Update the device vector
 	relaysCirc = getRelaysInCircuit(relays,circuit)
 	for relay in relaysCirc:
@@ -277,7 +306,7 @@ relays.read(config.get("config","device_file"))
 
 method = sys.argv[1]
 
-shiftRegisters(3)
+shiftRegisters(4)
 
 ### Define actione based on method received
 # toggle the value of a specific relay
