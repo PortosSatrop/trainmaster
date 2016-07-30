@@ -21,10 +21,10 @@ $ git clone  https://github.com/chapunazar/trainmaster.git
 ```
 
 
-2) Install Python and RPi.GPIO lib
-If Python is not installed then
+2) Install Python-dev and RPi.GPIO lib
+There are several ways to install python, most probably python 2 is there already
 ```
-$sudo apt-get install python-dev python3-dev
+$sudo apt-get install python-dev
 ```
 Then RPi.GPIO lib
 ```
