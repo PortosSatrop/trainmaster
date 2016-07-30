@@ -43,19 +43,11 @@ $ sudo rm -rf shiftpi
 ```
 $ chmod 666 relays.ini
 ```
-5) Need to provide more privileges to www-data to access GPIO.
-```
-$ sudo visudo
-```
-add the line:
-`www-data ALL=(ALL) NOPASSWD: ALL`
-
-This one is too risky! basically www-data has root access! Cross site-scripting could allow someone to become root by tricking your server into running a command possibly destroying your Pi. Instead you should make a group with
+5) Need to provide privileges to www-data to access GPIO.
 ```
 $ sudo addgroup gpio (if does not exist)
 ``` 
 then give access to GPIO pins
-
 ```
 $ sudo chown -R root:gpio /sys/class/gpio
 ``` 
@@ -63,7 +55,15 @@ then add www-data to gpio group
 ```
 $ sudo adduser www-data gpio
 ```
-Finally, remove www-data from sudoers!
+
+If the above doesnt work and your Pi will not be connected to the INET then try the following which is too risky! basically www-data will have root access! Cross site-scripting could allow someone to become root by tricking your server into running a command possibly destroying your Pi.
+```
+$ sudo visudo
+```
+add the line:
+`www-data ALL=(ALL) NOPASSWD: ALL`
+
+Happy relaying!
 
 ## Copyright
 Copyright (c) 2016 Manuel Nazar Anchorena. See LICENSE for further details.
