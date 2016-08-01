@@ -63,6 +63,14 @@ $ sudo visudo
 add the line:
 `www-data ALL=(ALL) NOPASSWD: ALL`
 
+6) Working in a non RaspPi.
+If you are not coding in the RPi then you will receive error from the RPi GPio stating the device is not a RPi. For that purpose edit the file .env and put "dev" in the APP_ENV key. Once in the RPi simply put "production". This file is version control ignored 
+```
+[MAIN]
+APP_ENV=dev
+```
+
+
 Happy relaying!
 
 ## Copyright
