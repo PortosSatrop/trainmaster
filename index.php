@@ -323,9 +323,9 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
         <div class="container">
             <div class="navbar-header">
                 <!-- Branding Image -->
-                <a class="navbar-brand" href="/index.php">
+               <button type="button" class="btn btn-link navbar-brand" data-toggle="modal" data-target="#myModal">
                     Train Master
-                </a>
+                </button>
             </div>
             <div class="collapse navbar-collapse" id="spark-navbar-collapse">
 		<img style="vertical-align:middle" src="img/marklin.png" width="100">
@@ -407,6 +407,28 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 </div>
 </div>
 
-
+ <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Train Master</h4>
+        </div>
+        <div class="modal-body">
+          <p>Relay Control for model train. Get project here:
+          <br />
+          <a href="https://github.com/chapunazar/trainmaster">https://github.com/chapunazar/trainmaster</a>
+          
+          
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 </body>
 </html>
