@@ -6,285 +6,17 @@ require_once(__ROOT__.'/basic.php');
 <html>
 <head>
 <title>Train Master</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
-    <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700" rel='stylesheet' type='text/css'>
-    <!-- Styles -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-<!-- JavaScripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> 
-<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/jquery.imagemapster.js"></script>
-<!--<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/map.js"></script>-->
-<script type="text/javascript">
 
 
+<!-- Styles -->
 
-$(document).ready(function ()
-{
-// default colors
-var default_active_color = "00FF00";
-var default_inactive_color = "FF0000";
-var default_color = "FFFFFF";
-var turnout_active_color = "FFFF00";
+<!-- Fonts -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" integrity="sha384-XdYbMnZ/QjLh6iI4ogqCTaIjrFk87ip+ekIjefZch0Y+PvJ8CDYtEs1ipDmPorQ+" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700">
+    
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-//Hidden by default
-$('#debug').hide();
-
-/* USING AJAX
-function Notused_toggleDevice(device){
-	var info = '{"device":"'+ device + '"}';
-	$.ajax({ 
-		type: "GET",
-		dataType: "json",
-		data: { method: "hello", format: "json" },
-		url: "service.php",
-		success: function(info){        
-		 }
-
-	}).done(function() {
-		info = JSON.stringify(info);
-		return info;	
-	});
-
-}
-*/
-
-function showLog(txt){
-	txt = txt.replace(/\\n/g,"<br />");
-	$('#debugtxt').html(txt);
-}
-
-function getRelayCategory(relay){
-	//this function could never be used
-	var v = relay.split("-");
-	var cat = "unknown";
-	if (v[0].toUpperCase() == "P"){
-		cat="power";
-	}
-	if (v[0].toUpperCase() == "T"){
-		cat="turnout";
-	}
-	return cat;
-	
-}
-
-function sendMessage (data){
-	var xhttp;
-
-	if (window.XMLHttpRequest) {
-		xhttp = new XMLHttpRequest();
-	} else {
-		// code for IE6, IE5
-		xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	
-	data = encodeURI(data + '&format=json');
-	xhttp.open("GET", data , false); //false to make it asynch
-	xhttp.send();
-	return xhttp.responseText;
-
-}
-
-function toggleDevice(device){
-	var method = 'toggle';
-	var info = '{"device":"'+ device + '","method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function allStop(){
-	var method = 'allstop';	
-	var info = '{"method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   	
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function allStart(){
-	var method = 'allstart';
-	var info = '{"method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   	
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function startCircuit(circuit){
-	var method = 'startcircuit';
-	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
-	var data = "service.php?info=" + info;   	
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function stopCircuit(circuit){
-	var method = 'stopcircuit';
-	var info = '{"method":"'+ method + '","circuit":"' + circuit + '"}';
-	var data = "service.php?info=" + info;   	
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function allStraight(){
-	var method = 'allstraight';
-	var info = '{"method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   	
-	data = sendMessage(data);
-	showLog(data);
-}
-
-function innerSize(size){
-	var w = $('#innermap').width();
-	w = w*size;
-	$('#innermap').mapster('resize',w);
-}
-
-var image = $('#innermap');
-image.mapster({
-        
-	mapKey: 'data-key',
-	fillOpacity: 1,
-        fillColor: default_color,  //normally never used
-        //fillColor: default_inactive_color,  //normally never used
-	
-	render_select: {
-		fillColor: default_active_color                                                        
-        },
-
-        onClick: function (e) {
-		var resp = toggleDevice(e.key);
-		var cat = getRelayCategory(e.key);
-		if (cat=="turnout"){
-			image.mapster('set_options', { 
-	                areas: [{
-        	            key: e.key,
-                	    render_select: {fillColor: turnout_active_color}
-	                    }]
-
-        	        });
-		}
-        },
-
-});
-
-//Capture the EMERGENCY STOP and the ALL START
-$('#Lallstop').click(function(){ 
-	//var opts = image.mapster('get_options');
-	//image.mapster(opts); //do not use, it will remove turnouts as well
-	allStop();
-	var neKeys = image.mapster('keys','power-all');
-	image.mapster('set', false, neKeys);
-	return false;
-});
-$('#Lallstart').click(function(){ 
-	allStart();
-	//image.mapster('set',true,'P-REL01');
-	var neKeys = image.mapster('keys','power-all');
-	image.mapster('set', true, neKeys);
-	return false; 
-});
-
-//Capture start and stop events of the different circuits
-$('#LstartA').click(function(){ 
-	startCircuit("A");
-	var neKeys = image.mapster('keys','circA');
-	image.mapster('set', true, neKeys);
-	return false; 
-});
-$('#LstopA').click(function(){ 
-	stopCircuit("A");
-	var neKeys = image.mapster('keys','circA');
-	image.mapster('set', false, neKeys);
-	return false; 
-});
-
-$('#LstartB').click(function(){ 
-	startCircuit("B");
-	var neKeys = image.mapster('keys','circB');
-	image.mapster('set', true, neKeys);
-	return false; 
-});
-$('#LstopB').click(function(){ 
-	stopCircuit("B");
-	var neKeys = image.mapster('keys','circB');
-	image.mapster('set', false, neKeys);
-	return false; 
-});
-
-$('#RefreshDeviceStatus').click(function(){ 
-	//Get the status of the power refresh
-	var method = 'getdevicestatus';
-	
-	// First power devices
-	var category = 'power';
-	var info = '{"category":"'+ category + '","method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   
-	var text ="";
-	data = sendMessage(data);
-	// I receive a Json and remove first all backslash
-	var obj = JSON.parse(data);
-	data = JSON.parse(obj.data);
-	var value = false;
-	for (i = 0; i < data.devices.length; i++) { 
-		value = false;
-		if (data.devices[i].value.toUpperCase()=="HIGH"){
-			value = true;
-		}	
-		image.mapster('set', Boolean(value), data.devices[i].id);
-		text += "Setting " + value + " to " + data.devices[i].id + "<br>";
-	}
-
-	//Now turnouts
-	var category = 'turnout';
-	var info = '{"category":"'+ category + '","method":"'+ method + '"}';
-	var data = "service.php?info=" + info;   
-	data = sendMessage(data);
-	// I receive a Json and remove first all backslash
-	var obj = JSON.parse(data);
-	data = JSON.parse(obj.data);
-	var value = false;
-	for (i = 0; i < data.devices.length; i++) { 
-		value = false;
-		if (data.devices[i].status.toUpperCase()=="DEVIATE"){
-			value = true;
-		}		
-		image.mapster('set_options', { 
-	                areas: [{
-        	            key: data.devices[i].id,
-                	    render_select: {fillColor: turnout_active_color}
-	                    }]
-
-        	        });
-
-		image.mapster('set', Boolean(value), data.devices[i].id);
-		text += "Setting " + value + " to " + data.devices[i].id + "<br>";
-	}
-	showLog(text);
-
-
-
-	return false; 
-
-});
-
-//Capture the All Straight order
-$('#Lallstraight').click(function(){ 
-	allStraight();
-	var neKeys = image.mapster('keys','turnout-all');
-	image.mapster('set', false, neKeys);
-	return false;
-});
-//Change maps size dynamically
-$('#innerDecrease').click(function(){ innerSize(0.9); return false; });
-$('#innerIncrease').click(function(){ innerSize(1.1); return false; });
-
-//Toggle view hide log
-$('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
-
-
-//from document ready
-});
-</script>
 <style>
         body {
             font-family: 'Lato';
@@ -315,6 +47,19 @@ $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 	word-wrap: break-word; /* Internet Explorer 5.5+ */
 	}
 </style>
+
+
+<!-- JavaScripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<!-- Latest compiled and minified Bootstrap JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<!-- lOCAL lIBS -->
+<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/jquery.imagemapster.js"></script>
+
+<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/relay.events.js"></script>
+
 
 </head>
 <body>
