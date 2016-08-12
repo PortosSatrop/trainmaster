@@ -2,6 +2,13 @@ Trainmaster
 ===========
 Web UI to control Marklin tracks or any other brand
 
+Though its aimed to power tracks or turnouts actually the architecture is valid for any use. Of course the graphics would need to be adapted
+
+Features:
+* Relay control on power line into tracks. Circuit must be segmented (isolated) in order for controlling parts of it. GND must not be segmented only 3-track (power track).
+* Relay control on lights or any other ON/OFF device.
+* Relay control on turnouts (experimental for the moment). TODO 3-turnout challenge
+
 This application uses python 2 external libs RPi.GPIO and SHIFTPI
 
 `https://github.com/mignev/shiftpi`
