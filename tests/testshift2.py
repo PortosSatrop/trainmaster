@@ -1,12 +1,12 @@
 #import shiftpi
 import shiftpi.shiftpi as shiftpi
 
-shiftpi.shiftRegisters(4) 
+shiftpi.shiftRegisters(8) 
 
 shiftpi.digitalWrite(shiftpi.ALL, shiftpi.LOW)
 shiftpi.delay(1000)
 
-for i in range(0,32):
+for i in range(0,64):
 	print (i+1)
 	shiftpi.digitalWrite(shiftpi.ALL, shiftpi.LOW)
 	shiftpi.digitalWrite(i, shiftpi.HIGH)

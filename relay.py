@@ -307,7 +307,7 @@ relays.read(config.get("config","device_file"))
 
 method = sys.argv[1]
 
-shiftRegisters(4)
+shiftRegisters(8)
 
 ### Define actione based on method received
 # toggle the value of a specific relay
