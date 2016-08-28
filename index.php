@@ -8,37 +8,30 @@ require_once(__ROOT__.'/basic.php');
 <title>Train Master</title>
 
 
-<!-- Styles -->
 
 <!-- Fonts -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" integrity="sha384-XdYbMnZ/QjLh6iI4ogqCTaIjrFk87ip+ekIjefZch0Y+PvJ8CDYtEs1ipDmPorQ+" crossorigin="anonymous">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700">
+<link rel="stylesheet" href="<?php print_r($configv["home"]);?>/css/font-awesome.min.css" integrity="sha384-XdYbMnZ/QjLh6iI4ogqCTaIjrFk87ip+ekIjefZch0Y+PvJ8CDYtEs1ipDmPorQ+" crossorigin="anonymous">
+<link rel="stylesheet" href="<?php print_r($configv["home"]);?>/css/font.family.lato">
+<!-- Styles -->
+<link rel="stylesheet" href="<?php print_r($configv["home"]);?>/css/bootstrap.min.css">
     
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
 <style>
         body {
             font-family: 'Lato';
         }
-
         .fa-btn {
             margin-right: 6px;
         }
-	
 	#fixed-top {
 	    position: fixed;
 	    z-index: 1;
 	    margin: auto;
 	    width: 100%;
 	}
-
 	#content-pos {
 	position: relative;
 	top: 4em;
-
 	}
-
 	pre {
 	white-space: pre-wrap; /* CSS3 */
 	white-space: -moz-pre-wrap; /* Mozilla, post millennium */
@@ -48,19 +41,6 @@ require_once(__ROOT__.'/basic.php');
 	}
 </style>
 
-
-<!-- JavaScripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<!-- Latest compiled and minified Bootstrap JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
-<!-- lOCAL lIBS -->
-<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/jquery.imagemapster.js"></script>
-
-<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/relay.events.js"></script>
-
-
 </head>
 <body>
 <div id="fixed-top">
@@ -68,7 +48,7 @@ require_once(__ROOT__.'/basic.php');
         <div class="container">
             <div class="navbar-header">
                 <!-- Branding Image -->
-               <button type="button" class="btn btn-link navbar-brand" data-toggle="modal" data-target="#myModal">
+               <button type="button" class="btn btn-link navbar-brand" data-toggle="modal" data-target="#aboutModal">
                     Train Master
                 </button>
             </div>
@@ -80,11 +60,19 @@ require_once(__ROOT__.'/basic.php');
                     <li><a href="#outer">Outer Circuit</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
-                    <li><a id="RefreshDeviceStatus" href="#">Refresh Device Status</a></li>
                     <li><a id="Lallstraight" href="#">All Straight!</a></li>
                     <li><a id="Lallstart" href="#">All Start!</a></li>
                     <li><a id="Lallstop" href="#">Emergency Stop!</a></li>
+            	    <li class="dropdown">
+	                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin<span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a id="RefreshDeviceStatus" href="#">Refresh Device Status</a></li>
+                          <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="#" data-toggle="modal" data-target="#shutdownModal">Shutdown!</a></li>
+                      </ul>
+            	    </li>
+		
                 </ul>
  
              </div>
@@ -152,8 +140,8 @@ require_once(__ROOT__.'/basic.php');
 </div>
 </div>
 
- <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
+ <!-- About Modal -->
+  <div class="modal fade" id="aboutModal" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -164,8 +152,6 @@ require_once(__ROOT__.'/basic.php');
           <p>Relay Control for model train. Get project here:
           <br />
           <a href="https://github.com/chapunazar/trainmaster">https://github.com/chapunazar/trainmaster</a>
-          
-          
           </p>
         </div>
         <div class="modal-footer">
@@ -174,6 +160,38 @@ require_once(__ROOT__.'/basic.php');
       </div>
     </div>
   </div>
-  
+ 
+ <!-- Shutdown Modal -->
+  <div class="modal fade" id="shutdownModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Train Master</h4>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to shutdown the Raspberry Pi?
+          <br />
+	   TrainMaster will stop to respond to your commands.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn btn-danger" data-dismiss="modal" id="Shutdown" href="#">Yes</button>
+          <a type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+
+<!-- JavaScripts -->
+<!-- Latest compiled and minified Bootstrap JavaScript -->
+
+<!-- lOCAL lIBS -->
+<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/jquery.min.js"></script>
+<script src="<?php print_r($configv["home"]);?>/scripts/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/jquery.imagemapster.js"></script>
+<script type="text/javascript" src="<?php print_r($configv["home"]);?>/scripts/relay.events.js"></script>
+ 
 </body>
 </html>

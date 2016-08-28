@@ -113,6 +113,17 @@ function allStraight(){
 	showLog(data);
 }
 
+// Shutdown Rpi
+function Shutdown(){
+	var method = 'shutdown';
+	var info = '{"method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	showLog(data);
+}
+
+
+
 function innerSize(size){
 	var w = $('#innermap').width();
 	w = w*size;
@@ -260,6 +271,12 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 
 //Toggle view hide log
 $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
+
+//Shutdown Raspberry Pi
+$('#Shutdown').click(function(){ 
+	Shutdown();
+	return false; 
+});
 
 
 //from document ready
