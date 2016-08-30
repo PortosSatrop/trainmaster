@@ -6,7 +6,7 @@
 
 		$_GET['format'] = [ json | html | xml ]
 		$_GET['info'] = JSON
-		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit | getdevicestatus | allstraight ]
+		JSON method = [ toggle | allstop | allstart | startcircuit | stopcircuit | getdevicestatus | allstraight | shutdown ]
 		JSON device = [P-REL01 for example] or [JSON category = power for example] or [ JSON circuit = A for exmaple ]
 
 	Output: A formatted HTTP response
@@ -155,6 +155,27 @@ if(!property_exists($info, 'method') && !is_array($info->method)){
 		$response['code'] = 1;
 		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
 		$response['data'] = 'Hello World';
+	}
+
+	// Shutdown RPi
+	if( strcasecmp($method,'shutdown') == 0){
+		$device = $info->device;
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$result = shell_exec("sudo shutdown");
+		$response['data'] = $result;
+	}
+	
+	// Shutdown RPi
+	if( strcasecmp($method,'RPiInfo') == 0){
+		$device = $info->device;
+		$response['code'] = 1;
+		$response['status'] = $api_response_code[ $response['code'] ]['HTTP Response'];
+		$r1 = shell_exec("uname -a");
+		$r2 = shell_exec("free -h");
+		$r3 = shell_exec('ip a s|sed -ne "/127.0.0.1/!{s/^[ \t]*inet[ \t]*\([0-9.]\+\)\/.*$/\1/p}"');
+		$result = "System: \n".$r1."\n\nMemory:\n".$r2."\n\nIP Adresses: \n".$r3;
+		$response['data'] = $result;
 	}
 
 	// Method Toggle device

@@ -69,7 +69,8 @@ require_once(__ROOT__.'/basic.php');
                           <li><a id="RefreshDeviceStatus" href="#">Refresh Device Status</a></li>
                           <li><a id="ToggleLog" href="#">Hide/View Log</a></li>
                           <li role="separator" class="divider"></li>
-                          <li><a href="#" data-toggle="modal" data-target="#shutdownModal">Shutdown!</a></li>
+                          <li><a id="LRPiInfo" data-toggle="modal" data-target="#RPiInfoModal" href="#">Raspberry Pi Info</a></li>
+                          <li><a id="Lshutdown" href="#" data-toggle="modal" data-target="#shutdownModal">Shutdown!</a></li>
                       </ul>
             	    </li>
 		
@@ -160,6 +161,23 @@ require_once(__ROOT__.'/basic.php');
       </div>
     </div>
   </div>
+  
+ <!-- RPiInfo Modal -->
+  <div class="modal fade" id="RPiInfoModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Train Master - Raspberry Pi Info</h4>
+        </div>
+        <div class="modal-body" id="RPiInfoText">
+        </div>
+        <div class="modal-footer">
+          <a type="button" class="btn btn-default" data-dismiss="modal">Close</a>
+        </div>
+      </div>
+    </div>
+  </div>
  
  <!-- Shutdown Modal -->
   <div class="modal fade" id="shutdownModal" role="dialog">
@@ -169,20 +187,21 @@ require_once(__ROOT__.'/basic.php');
           <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title">Train Master</h4>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="shutdownText">
           <p>Are you sure you want to shutdown the Raspberry Pi?
           <br />
 	   TrainMaster will stop to respond to your commands.
           </p>
         </div>
         <div class="modal-footer">
-          <a type="button" class="btn btn-danger" data-dismiss="modal" id="Shutdown" href="#">Yes</button>
-          <a type="button" class="btn btn-default" data-dismiss="modal">No</button>
+          <a type="button" class="btn btn-danger" data-dismiss="modal" id="Shutdown" href="#">Yes</a>
+          <a type="button" class="btn btn-default" data-dismiss="modal">No</a>
         </div>
       </div>
     </div>
   </div>
  
+
 
 <!-- JavaScripts -->
 <!-- Latest compiled and minified Bootstrap JavaScript -->

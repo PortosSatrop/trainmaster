@@ -122,6 +122,15 @@ function Shutdown(){
 	showLog(data);
 }
 
+// RPiInfo
+function RPiInfo(){
+	var method = 'RPiInfo';
+	var info = '{"method":"'+ method + '"}';
+	var data = "service.php?info=" + info;   	
+	data = sendMessage(data);
+	return data;
+}
+
 
 
 function innerSize(size){
@@ -272,9 +281,25 @@ $('#innerIncrease').click(function(){ innerSize(1.1); return false; });
 //Toggle view hide log
 $('#ToggleLog').click(function(){ $('#debug').toggle(); return false; });
 
+//Toggle view modal
+$('#Lshutdown').click(function(){ 
+	$('#shutdownModal').modal('toggle'); 
+	return false;
+});
+
 //Shutdown Raspberry Pi
 $('#Shutdown').click(function(){ 
+	$('#shutdownText').html("<p>Shutting down... bye bye!</p>");
 	Shutdown();
+	return false; 
+});
+
+//Raspberry Pi Info
+$('#LRPiInfo').click(function(){ 
+	result = RPiInfo();
+	obj = JSON.parse(result);
+	$('#RPiInfoText').html("Showing OS and Memory: <br /><pre>" + obj.data + "</pre>");
+	$('#RPiInfoModal').modal('toggle'); 
 	return false; 
 });
 
